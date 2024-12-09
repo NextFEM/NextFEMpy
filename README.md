@@ -4,6 +4,7 @@ NextFEM REST API wrapper in pure Python, to be used with NextFEM Designer or Nex
 It is a complete set of REST API call, wrapped in Python functions, distinguishing between mandatory and optional arguments.
 
 If you're looking for NextFEMpy source, look into /nextfempy folder.
+If you're looking for sample code using nextfempy, look into /samples folder.
 
 ## Installation instructions
 
