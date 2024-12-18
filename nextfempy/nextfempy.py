@@ -108,7 +108,7 @@ class NextFEMrest:
     def addNVMhinge(self, name, checkType, position, includeShear=False, includeTorsion=False, cKpl=0.001, FresRatio=0.2, stopResidualBranch=False): return sbool(self.nfrest('GET', '/hinge/add/nvm/'+name+'/'+checkType+'/'+str(position)+'/'+str(includeShear)+'/'+str(includeTorsion)+'/'+str(cKpl)+'/'+str(FresRatio)+'/'+str(stopResidualBranch)+'', None, None))
     def addObject(self, o, other=0): return sbool(self.nfrest('POST', '/model/addobject/'+str(other)+'', o, None))
     def addOmegaSection(self, Lz, Ly, tw, d): return int(self.nfrest('GET', '/section/add/omega/'+str(Lz)+'/'+str(Ly)+'/'+str(tw)+'/'+str(d)+'', None, None))
-    def addOrChangeDesMaterialProperty(self, ID, name, value, units=''): return sbool(self.nfrest('POST', '/designmaterial/prop/'+str(ID)+'/'+name+'/'+str(value)+'/'+units+'', None, None))
+    def addOrChangeDesMaterialProperty(self, ID, name, value, units=''): return sbool(self.nfrest('POST', '/designmaterial/prop/'+str(ID)+'/'+name+'/'+value+'/'+units+'', None, None))
     def addOrChangeMaterialProperty(self, ID, name, value, units=''): return sbool(self.nfrest('POST', '/material/prop/'+str(ID)+'/'+name+'/'+value+'/'+units+'', None, None))
     def addOrModifyCustomData(self, key, value): return sbool(self.nfrest('POST', '/model/customdata/'+key+'', value, None))
     def addPipeSection(self, D, t): return int(self.nfrest('GET', '/section/add/pipe/'+str(D)+'/'+str(t)+'', None, None))

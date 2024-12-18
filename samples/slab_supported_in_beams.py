@@ -11,7 +11,7 @@ nf.setUnits('m', 'kN')
 
 # Materials
 mat = nf.addIsoMaterial(
-	name = 'C25/30', 
+	name = 'Concrete', 
 	E = 31e6, 
 	ni = 0.15, 
 	Wden = 25, 
