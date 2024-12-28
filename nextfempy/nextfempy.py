@@ -28,14 +28,20 @@ class NextFEMrest:
 
     def nfrest(self, method, command, body=None, heads=None):
         url = self.baseUrl + command
+        hds=dict()
+        for dd in self.headers:
+            hds[dd]=self.headers[dd]
+        if not(heads is None):
+            for dd in heads:
+                hds[dd]=heads[dd]
         if method == "POST":
-            response = requests.post(url=url, headers=self.headers, json=body)
+            response = requests.post(url=url, headers=hds, json=body)
         elif method == "PUT":
-            response = requests.put(url=url, headers=self.headers, json=body)
+            response = requests.put(url=url, headers=hds, json=body)
         elif method == "GET":
-            response = requests.get(url=url, headers=self.headers)
+            response = requests.get(url=url, headers=hds)
         elif method == "DELETE":
-            response = requests.delete(url=url, headers=self.headers)
+            response = requests.delete(url=url, headers=hds)
         # print request and return response
         if self.msg: print("*** " + self.user + " :: " + method, command, response.status_code)
         return response.text
@@ -43,14 +49,20 @@ class NextFEMrest:
     def nfrestB(self, method, command, body=None, heads=None):
         # return bytes
         url = self.baseUrl + command
+        hds=dict()
+        for dd in self.headers:
+            hds[dd]=self.headers[dd]
+        if not(heads is None):
+            for dd in heads:
+                hds[dd]=heads[dd]
         if method == "POST":
-            response = requests.post(url=url, headers=self.headers, json=body)
+            response = requests.post(url=url, headers=hds, json=body)
         elif method == "PUT":
-            response = requests.put(url=url, headers=self.headers, json=body)
+            response = requests.put(url=url, headers=hds, json=body)
         elif method == "GET":
-            response = requests.get(url=url, headers=self.headers)
+            response = requests.get(url=url, headers=hds)
         elif method == "DELETE":
-            response = requests.delete(url=url, headers=self.headers)
+            response = requests.delete(url=url, headers=hds)
         return response.content
 
     # methods and properties for Server
