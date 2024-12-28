@@ -10,6 +10,8 @@ def qt(s):
     return urllib.parse.quote(s, safe='')
 
 class NextFEMrest:
+    headers = {}
+
     def __init__(self,_baseUrl=None,_user="",_msg=True):
         if _baseUrl is None:
             self.baseUrl="http://localhost:5151"
@@ -17,22 +19,23 @@ class NextFEMrest:
             self.baseUrl=str(_baseUrl)
         self.user=_user
         self.msg=_msg
+        if self.user != "": self.headers["user"]=self.user
+
+    def setHeaders(self, headersDict):
+        if not(headersDict is None):
+            for dd in headersDict:
+                self.headers[dd]=headersDict[dd]
 
     def nfrest(self, method, command, body=None, heads=None):
         url = self.baseUrl + command
-        headers = {}
-        if self.user != "": headers["user"]=self.user
-        if not(heads is None):
-            for dd in heads:
-                headers[dd]=heads[dd]
         if method == "POST":
-            response = requests.post(url=url, headers=headers, json=body)
+            response = requests.post(url=url, headers=self.headers, json=body)
         elif method == "PUT":
-            response = requests.put(url=url, headers=headers, json=body)
+            response = requests.put(url=url, headers=self.headers, json=body)
         elif method == "GET":
-            response = requests.get(url=url, headers=headers)
+            response = requests.get(url=url, headers=self.headers)
         elif method == "DELETE":
-            response = requests.delete(url=url, headers=headers)
+            response = requests.delete(url=url, headers=self.headers)
         # print request and return response
         if self.msg: print("*** " + self.user + " :: " + method, command, response.status_code)
         return response.text
@@ -40,19 +43,14 @@ class NextFEMrest:
     def nfrestB(self, method, command, body=None, heads=None):
         # return bytes
         url = self.baseUrl + command
-        headers = {}
-        if self.user != "": headers["user"]=self.user
-        if not(heads is None):
-            for dd in heads:
-                headers[dd]=heads[dd]
         if method == "POST":
-            response = requests.post(url=url, headers=headers, json=body)
+            response = requests.post(url=url, headers=self.headers, json=body)
         elif method == "PUT":
-            response = requests.put(url=url, headers=headers, json=body)
+            response = requests.put(url=url, headers=self.headers, json=body)
         elif method == "GET":
-            response = requests.get(url=url, headers=headers)
+            response = requests.get(url=url, headers=self.headers)
         elif method == "DELETE":
-            response = requests.delete(url=url, headers=headers)
+            response = requests.delete(url=url, headers=self.headers)
         return response.content
 
     # methods and properties for Server
