@@ -197,6 +197,7 @@ class NextFEMrest:
     def convertUnits(self, length, force): return self.nfrest('GET', '/units/convertunits/'+qt(length)+'/'+qt(force)+'', None, None)
     def convertValue(self, value, OldUnits, NewUnits): return float(self.nfrest('GET', '/units/convert/'+str(value)+'', None, dict([("OldUnits",OldUnits),("NewUnits",NewUnits)])))
     def createDocX(self, path, text, template=''): return sbool(self.nfrest('GET', '/op/docx/create'+json.dumps(text)+'', None, dict([("path",path),("template",template)])))
+    def customCheck(self, formulae): return json.loads(self.nfrest('POST', '/res/check/item', formulae, None))
     def CustomLicense(self, lic): return sbool(self.nfrest('GET', '/op/lic', None, dict([("val",lic)])))
     def defaultColors(self): return self.nfrest('GET', '/model/colors/default', None, None)
     def deleteChecks(self): return sbool(self.nfrest('GET', '/res/delchecks', None, None))
@@ -281,6 +282,7 @@ class NextFEMrest:
     def getFunctionUnits(self, funcID): return self.nfrest('GET', '/function/units/'+str(funcID)+'', None, None)
     def getGreekLetter(self, input): return self.nfrest('GET', '/op/greek'+qt(input)+'', None, None)
     def getGroups(self): return json.loads(self.nfrest('GET', '/groups', None, None))
+    def getItemDataResults(self, item, lc, t, station=0): return json.loads(self.nfrest('GET', '/res/check/data/'+qt(item)+'/'+qt(lc)+'/'+qt(t)+'/'+str(station)+'', None, None))
     def getLanguage(self): return self.nfrest('GET', '/op/opt/lang', None, None)
     def getLastBilinearMomentCurvature(self): return json.loads(self.nfrest('GET', '/op/sectioncalc/bilmomentcurvature', None, None))
     def getLastMomentCurvatureData(self): return json.loads(self.nfrest('GET', '/op/sectioncalc/momentcurvaturedata', None, None))
@@ -582,6 +584,10 @@ class NextFEMrest:
     def DocXtableAlignment(self): return int(self.nfrest('GET','/op/docx/tablealign'))
     @DocXtableAlignment.setter
     def DocXtableAlignment(self,value): self.nfrest('POST','/op/docx/tablealign', heads={'val':str(value)})
+    @property
+    def DocXtableBorders(self): return json.loads(self.nfrest('GET','/op/docx/tableborders'))
+    @DocXtableBorders.setter
+    def DocXtableBorders(self,value): self.nfrest('POST','/op/docx/tableborders', heads={'val':str(value)})
     @property
     def DocXtableFitting(self): return sbool(self.nfrest('GET','/op/docx/tablefit'))
     @DocXtableFitting.setter
