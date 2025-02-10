@@ -338,10 +338,12 @@ class NextFEMrest:
     def getSectionColor(self, ID): return int(self.nfrest('GET', '/section/set/color/'+qt(ID)+'', None, None))
     def getSectionCutForce(self, groupName, loadcase, time, type): return float(self.nfrest('GET', '/res/sectioncutforce/'+qt(groupName)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type)+'', None, None))
     def getSectionFigure(self, sectionID, figureID, isHole=False): return json.loads(self.nfrest('GET', '/section/figure/'+str(sectionID)+'/'+str(figureID)+'/'+str(isHole)+'', None, None))
+    def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0): return json.loads(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'', None, None))
     def getSectionOffset(self, ID): return json.loads(self.nfrest('GET', '/section/set/offset/'+qt(ID)+'', None, None))
     def getSectionProperties(self, ID): return json.loads(self.nfrest('GET', '/section/props/'+qt(ID)+'', None, None))
     def getSectionProperty(self, ID, name): return self.nfrest('GET', '/section/prop/'+qt(ID)+'/'+qt(name)+'', None, None)
     def getSectionRebarCoords(self, ID): return json.loads(self.nfrest('GET', '/section/rebar/coords/'+qt(ID)+'', None, None))
+    def getSectionRebarSize(self, ID): return json.loads(self.nfrest('GET', '/section/rebar/size/'+qt(ID)+'', None, None))
     def getSectionResDomainPoints(self, domainIndex, domainType, cleanResponseTolerance=0): return json.loads(self.nfrest('GET', '/res/check/plotsectiondomain/'+str(domainIndex)+'/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
     def getSectionResMoments(self, ID, station, calcType, N, Myy, Mzz): return self.nfrest('GET', '/op/sectioncalc/a/'+qt(ID)+'/'+str(station)+'/'+str(calcType)+'/'+str(N)+'/'+str(Myy)+'/'+str(Mzz)+'', None, None)
     def getSectionResMoments(self, sectionID, materialID, calcType, N, Myy, Mzz): return self.nfrest('GET', '/op/sectioncalc/b/'+qt(sectionID)+'/'+qt(materialID)+'/'+str(calcType)+'/'+str(N)+'/'+str(Myy)+'/'+str(Mzz)+'', None, None)
@@ -514,7 +516,7 @@ class NextFEMrest:
     def setSectionColor(self, ID, Red, Green, Blue): return sbool(self.nfrest('POST', '/section/set/color/'+qt(ID)+'/'+str(Red)+'/'+str(Green)+'/'+str(Blue)+'', None, None))
     def setSectionMaterial(self, ID, materialID): return sbool(self.nfrest('GET', '/section/set/material/'+str(ID)+'/'+str(materialID)+'', None, None))
     def setSectionOffset(self, ID, offsetZ, offsetY): return sbool(self.nfrest('POST', '/section/set/offset/'+qt(ID)+'/'+str(offsetZ)+'/'+str(offsetY)+'', None, None))
-    def setSectionProperty(self, ID, name, value): return int(self.nfrest('POST', '/section/prop/'+qt(ID)+'/'+qt(name)+'/'+str(value)+'', None, None))
+    def setSectionProperty(self, ID, name, value): return int(self.nfrest('POST', '/section/prop/'+qt(ID)+'/'+qt(name)+'/'+qt(value)+'', None, None))
     def setSectionRebarsToElements(self, ID): return sbool(self.nfrest('GET', '/section/rebar/toelems/'+qt(ID)+'', None, None))
     def setSectionRebarsToElements(self, ID): return sbool(self.nfrest('GET', '/section/rebar/toelems/'+str(ID)+'', None, None))
     def setSeismicFloorEccentricity(self, thID, ct=0.05, lam=1): return sbool(self.nfrest('GET', '/loadcase/combo/setseismicecc/'+str(thID)+'/'+str(ct)+'/'+str(lam)+'', None, None))
@@ -596,6 +598,10 @@ class NextFEMrest:
     def DocXtableFontSize(self): return int(self.nfrest('GET','/op/docx/tablefontsize'))
     @DocXtableFontSize.setter
     def DocXtableFontSize(self,value): self.nfrest('POST','/op/docx/tablefontsize', heads={'val':str(value)})
+    @property
+    def dontDeleteChecks(self): return sbool(self.nfrest('GET','/res/donotdeletechecks'))
+    @dontDeleteChecks.setter
+    def dontDeleteChecks(self,value): self.nfrest('POST','/res/donotdeletechecks', heads={'val':str(value)})
     @property
     def dontDeleteResults(self): return sbool(self.nfrest('GET','/res/donotdelete'))
     @dontDeleteResults.setter
@@ -754,6 +760,10 @@ class NextFEMrest:
     def sectCalcAccuracy(self): return int(self.nfrest('GET','/op/opt/calcaccuracy'))
     @sectCalcAccuracy.setter
     def sectCalcAccuracy(self,value): self.nfrest('POST','/op/opt/calcaccuracy', heads={'val':str(value)})
+    @property
+    def sectCalcCacheSize(self): return int(self.nfrest('GET','/op/opt/calcusefibers'))
+    @sectCalcCacheSize.setter
+    def sectCalcCacheSize(self,value): self.nfrest('POST','/op/opt/calcusefibers', heads={'val':str(value)})
     @property
     def sectCalcUseFibers(self): return sbool(self.nfrest('GET','/op/opt/calcusefibers'))
     @sectCalcUseFibers.setter
