@@ -7,7 +7,10 @@ def sbool(arg):
         return False
 
 def qt(s):
-    return urllib.parse.quote(s, safe='')
+    try:
+        return urllib.parse.quote(s, safe='')
+    except:
+        return s
 
 class NextFEMrest:
     headers = {}
@@ -160,6 +163,7 @@ class NextFEMrest:
     def appendDocXtext(self, text, alignment=0, color=0, bold=False, italic=False, underline=False): return sbool(self.nfrest('POST', '/op/docx/appendtext/'+str(alignment)+'/'+str(color)+'/'+str(bold)+'/'+str(italic)+'/'+str(underline)+'', text, None))
     def applyButterworthFilter(self, values, samplingF, cutF, order, lowPass): return json.loads(self.nfrest('POST', '/op/bwfilter/'+str(samplingF)+'/'+str(cutF)+'/'+str(order)+'/'+str(lowPass)+'', values, None))
     def applyEC8lateralForces(self, thID, loadCaseX, loadCaseY, propMasses=False, T1=0, ct=0.05, lam=1): return sbool(self.nfrest('GET', '/load/lateralforces/'+str(thID)+'/'+qt(loadCaseX)+'/'+qt(loadCaseY)+'/'+str(propMasses)+'/'+str(T1)+'/'+str(ct)+'/'+str(lam)+'', None, None))
+    def areRebarsInsideSection(self, ID): return json.loads(self.nfrest('GET', '/section/rebar/inside/'+qt(ID)+'', None, None))
     def assignHinge(self, beamID, hingeName): return sbool(self.nfrest('GET', '/hinge/assign/'+qt(beamID)+'/'+qt(hingeName)+'', None, None))
     def assignMaterialToElement(self, element, materialID): return sbool(self.nfrest('GET', '/material/assign/'+qt(element)+'/'+str(materialID)+'', None, None))
     def assignSectionToElement(self, element, sectionID): return sbool(self.nfrest('GET', '/section/assign/'+qt(element)+'/'+str(sectionID)+'', None, None))
@@ -246,6 +250,7 @@ class NextFEMrest:
     def getCornerNodes(self, nodes, lcs): return json.loads(self.nfrest('GET', '/op/corners', None, dict([("nodes",json.dumps(nodes)),("lcs",json.dumps(lcs))])))
     def getCustomData(self, key): return self.nfrest('GET', '/model/customdata/'+qt(key)+'', None, None)
     def getDataPlot(self, xseries, yseries, imagePath, name='', Xunits='', Yunits=''): return sbool(self.nfrest('GET', '/function/plotdata/'+qt(name)+'', None, dict([("path",imagePath),("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
+    def getDataPlot(self, xseries, yseries, transparent, name='', Xunits='', Yunits='', color=-7667573, useDots=True): return json.loads(self.nfrest('GET', '/function/plotdataB/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
     def getDefinedDesignMaterials(self): return json.loads(self.nfrest('GET', '/designmaterials', None, None))
     def getDefinedMaterials(self): return json.loads(self.nfrest('GET', '/materials', None, None))
     def getDefinedSections(self): return json.loads(self.nfrest('GET', '/sections', None, None))
@@ -338,7 +343,7 @@ class NextFEMrest:
     def getSectionColor(self, ID): return int(self.nfrest('GET', '/section/set/color/'+qt(ID)+'', None, None))
     def getSectionCutForce(self, groupName, loadcase, time, type): return float(self.nfrest('GET', '/res/sectioncutforce/'+qt(groupName)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type)+'', None, None))
     def getSectionFigure(self, sectionID, figureID, isHole=False): return json.loads(self.nfrest('GET', '/section/figure/'+str(sectionID)+'/'+str(figureID)+'/'+str(isHole)+'', None, None))
-    def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0): return json.loads(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'', None, None))
+    def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False): return json.loads(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None))
     def getSectionOffset(self, ID): return json.loads(self.nfrest('GET', '/section/set/offset/'+qt(ID)+'', None, None))
     def getSectionProperties(self, ID): return json.loads(self.nfrest('GET', '/section/props/'+qt(ID)+'', None, None))
     def getSectionProperty(self, ID, name): return self.nfrest('GET', '/section/prop/'+qt(ID)+'/'+qt(name)+'', None, None)
@@ -516,7 +521,7 @@ class NextFEMrest:
     def setSectionColor(self, ID, Red, Green, Blue): return sbool(self.nfrest('POST', '/section/set/color/'+qt(ID)+'/'+str(Red)+'/'+str(Green)+'/'+str(Blue)+'', None, None))
     def setSectionMaterial(self, ID, materialID): return sbool(self.nfrest('GET', '/section/set/material/'+str(ID)+'/'+str(materialID)+'', None, None))
     def setSectionOffset(self, ID, offsetZ, offsetY): return sbool(self.nfrest('POST', '/section/set/offset/'+qt(ID)+'/'+str(offsetZ)+'/'+str(offsetY)+'', None, None))
-    def setSectionProperty(self, ID, name, value): return int(self.nfrest('POST', '/section/prop/'+qt(ID)+'/'+qt(name)+'/'+qt(value)+'', None, None))
+    def setSectionProperty(self, ID, name, value): return int(self.nfrest('POST', '/section/prop/'+qt(ID)+'/'+qt(name)+'/'+str(value)+'', None, None))
     def setSectionRebarsToElements(self, ID): return sbool(self.nfrest('GET', '/section/rebar/toelems/'+qt(ID)+'', None, None))
     def setSectionRebarsToElements(self, ID): return sbool(self.nfrest('GET', '/section/rebar/toelems/'+str(ID)+'', None, None))
     def setSeismicFloorEccentricity(self, thID, ct=0.05, lam=1): return sbool(self.nfrest('GET', '/loadcase/combo/setseismicecc/'+str(thID)+'/'+str(ct)+'/'+str(lam)+'', None, None))
@@ -705,9 +710,17 @@ class NextFEMrest:
     @releasesColor.setter
     def releasesColor(self,value): self.nfrest('POST','/model/colors/release', heads={'val':str(value)})
     @property
+    def resCalc_accuracy(self): return int(self.nfrest('GET','/op/opt/calcaccuracy'))
+    @resCalc_accuracy.setter
+    def resCalc_accuracy(self,value): self.nfrest('POST','/op/opt/calcaccuracy', heads={'val':str(value)})
+    @property
     def resCalc_cacheEnabled(self): return sbool(self.nfrest('GET','/op/opt/rescalc/cacheenabled'))
     @resCalc_cacheEnabled.setter
     def resCalc_cacheEnabled(self,value): self.nfrest('POST','/op/opt/rescalc/cacheenabled', heads={'val':str(value)})
+    @property
+    def resCalc_cacheSize(self): return int(self.nfrest('GET','/op/opt/calcusefibers'))
+    @resCalc_cacheSize.setter
+    def resCalc_cacheSize(self,value): self.nfrest('POST','/op/opt/calcusefibers', heads={'val':str(value)})
     @property
     def resCalc_concreteBehaviour(self): return int(self.nfrest('GET','/op/opt/rescalc/concbeh'))
     @resCalc_concreteBehaviour.setter
@@ -749,6 +762,10 @@ class NextFEMrest:
     @resCalc_strandHardeningRatio.setter
     def resCalc_strandHardeningRatio(self,value): self.nfrest('POST','/op/opt/rescalc/strhard', heads={'val':str(value)})
     @property
+    def resCalc_useFibers(self): return sbool(self.nfrest('GET','/op/opt/calcusefibers'))
+    @resCalc_useFibers.setter
+    def resCalc_useFibers(self,value): self.nfrest('POST','/op/opt/calcusefibers', heads={'val':str(value)})
+    @property
     def restraintsColor(self): return int(self.nfrest('GET','/model/colors/restraint'))
     @restraintsColor.setter
     def restraintsColor(self,value): self.nfrest('POST','/model/colors/restraint', heads={'val':str(value)})
@@ -756,18 +773,6 @@ class NextFEMrest:
     def saveStateVariables(self): return sbool(self.nfrest('GET','/op/opt/os/statevars'))
     @saveStateVariables.setter
     def saveStateVariables(self,value): self.nfrest('POST','/op/opt/os/statevars', heads={'val':str(value)})
-    @property
-    def sectCalcAccuracy(self): return int(self.nfrest('GET','/op/opt/calcaccuracy'))
-    @sectCalcAccuracy.setter
-    def sectCalcAccuracy(self,value): self.nfrest('POST','/op/opt/calcaccuracy', heads={'val':str(value)})
-    @property
-    def sectCalcCacheSize(self): return int(self.nfrest('GET','/op/opt/calcusefibers'))
-    @sectCalcCacheSize.setter
-    def sectCalcCacheSize(self,value): self.nfrest('POST','/op/opt/calcusefibers', heads={'val':str(value)})
-    @property
-    def sectCalcUseFibers(self): return sbool(self.nfrest('GET','/op/opt/calcusefibers'))
-    @sectCalcUseFibers.setter
-    def sectCalcUseFibers(self,value): self.nfrest('POST','/op/opt/calcusefibers', heads={'val':str(value)})
     @property
     def sectionsID(self): return json.loads(self.nfrest('GET','/sections'))
     @property
