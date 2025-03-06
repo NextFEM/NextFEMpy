@@ -1,4 +1,7 @@
-import requests,json,urllib
+import requests,json,urllib,os,urllib3
+
+# Disable InsecureRequestWarning
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def sbool(arg):
     if arg=="True":
@@ -38,13 +41,13 @@ class NextFEMrest:
             for dd in heads:
                 hds[dd]=heads[dd]
         if method == "POST":
-            response = requests.post(url=url, headers=hds, json=body)
+            response = requests.post(url=url, headers=hds, json=body, verify=False)
         elif method == "PUT":
-            response = requests.put(url=url, headers=hds, json=body)
+            response = requests.put(url=url, headers=hds, json=body, verify=False)
         elif method == "GET":
-            response = requests.get(url=url, headers=hds)
+            response = requests.get(url=url, headers=hds, verify=False)
         elif method == "DELETE":
-            response = requests.delete(url=url, headers=hds)
+            response = requests.delete(url=url, headers=hds, verify=False)
         # print request and return response
         if self.msg: print("*** " + self.user + " :: " + method, command, response.status_code)
         return response.text
@@ -59,25 +62,43 @@ class NextFEMrest:
             for dd in heads:
                 hds[dd]=heads[dd]
         if method == "POST":
-            response = requests.post(url=url, headers=hds, json=body)
+            response = requests.post(url=url, headers=hds, json=body, verify=False)
         elif method == "PUT":
-            response = requests.put(url=url, headers=hds, json=body)
+            response = requests.put(url=url, headers=hds, json=body, verify=False)
         elif method == "GET":
-            response = requests.get(url=url, headers=hds)
+            response = requests.get(url=url, headers=hds, verify=False)
         elif method == "DELETE":
-            response = requests.delete(url=url, headers=hds)
+            response = requests.delete(url=url, headers=hds, verify=False)
         return response.content
 
     # methods and properties for Server
-    def saveUser(self): return bool(self.nfrest('GET', '/op/saveuser')); # save model on server
+    def saveUser(self): return sbool(self.nfrest('GET', '/op/saveuser')); # save model on server
+    # get file from server, return bytes
     def userFile(self, filename, localPath):
-        # get file from server, return bytes
         bts=self.nfrestB('GET', '/op/userfile', None, dict([("path",filename)]))
         if bts==b'False': 
             return False
         with open(localPath, "wb") as binary_file:
             binary_file.write(bts)
         return True
+    # send file to server, return string
+    def sendFile(self,localPath,remoteFolder=None):
+        filename = os.path.basename(localPath)
+        files = {
+            'file': (filename, open(localPath, 'rb'), 'application/octet-stream')
+        }
+        headers = self.headers.copy()
+        headers['path'] = remoteFolder
+        url = self.baseUrl + '/op/userfile'
+        try:
+            response = requests.post(url, headers=headers, files=files, verify=False)
+            if self.msg:
+                print("*** " + self.user + " :: POST /op/userfile", response.status_code)
+            return response.text
+        except Exception as e:
+            return f"Error in sending file: {str(e)}"
+        finally:
+            files['file'][1].close()
 
     # methods and properties
     def activeBarsDiameters(self): return json.loads(self.nfrest('GET', '/element/rebar/barsdiam', None, None))
@@ -378,11 +399,15 @@ class NextFEMrest:
     def importDolmen(self, path): return sbool(self.nfrest('GET', '/op/import/dolmen', None, dict([("path",path)])))
     def importDXF(self, path): return sbool(self.nfrest('GET', '/op/import/dxf', None, dict([("path",path)])))
     def importDXF(self, stream): return sbool(self.nfrest('POST', '/op/import/dxfstream', stream, None))
+    def importGMesh(self, path): return sbool(self.nfrest('GET', '/op/import/gmesh', None, dict([("path",path)])))
     def importIFC(self, path, includeRigidLinks=False): return sbool(self.nfrest('GET', '/op/import/ifc/'+str(includeRigidLinks)+'', None, dict([("path",path)])))
+    def importMesh(self, path): return sbool(self.nfrest('GET', '/op/import/mesh', None, dict([("path",path)])))
     def importMidas(self, path): return sbool(self.nfrest('GET', '/op/import/midasfile', None, dict([("path",path)])))
     def importMidas(self, model): return sbool(self.nfrest('POST', '/op/import/midastext', model, None))
     def importMidasResults(self, path): return sbool(self.nfrest('GET', '/op/import/midasresult', None, dict([("path",path)])))
     def importMidasResults(self, text): return sbool(self.nfrest('POST', '/op/import/midasresulttext', text, None))
+    def importNodeElemFiles(self, path): return sbool(self.nfrest('GET', '/op/import/nodeelem', None, dict([("path",path)])))
+    def importOBJ(self, path): return sbool(self.nfrest('GET', '/op/import/obj', None, dict([("path",path)])))
     def importOpenSees(self, path): return sbool(self.nfrest('GET', '/op/import/opensees', None, dict([("path",path)])))
     def importOpenSeesRecorder(self, path, type, useTimeFlag=True): return sbool(self.nfrest('GET', '/op/import/recorder/'+str(type)+'/'+str(useTimeFlag)+'', None, dict([("path",path)])))
     def importSAF(self, path): return sbool(self.nfrest('GET', '/op/import/saf', None, dict([("path",path)])))
@@ -394,10 +419,13 @@ class NextFEMrest:
     def importSofistik(self, path): return sbool(self.nfrest('GET', '/op/import/sofistik', None, dict([("path",path)])))
     def importSR3(self, path): return sbool(self.nfrest('GET', '/op/import/sr3', None, dict([("path",path)])))
     def importSR4(self, path): return sbool(self.nfrest('GET', '/op/import/sr4', None, dict([("path",path)])))
+    def importSTL(self, path): return sbool(self.nfrest('GET', '/op/import/stl', None, dict([("path",path)])))
     def importStraus7(self, path): return sbool(self.nfrest('GET', '/op/import/straus7', None, dict([("path",path)])))
     def importStrausResults(self, path): return sbool(self.nfrest('GET', '/op/import/straus7result', None, dict([("path",path)])))
     def importStrausResults(self, text): return sbool(self.nfrest('POST', '/op/import/straus7resulttext', text, None))
     def importWinStrand(self, path): return sbool(self.nfrest('GET', '/op/import/winstrand', None, dict([("path",path)])))
+    def importZeusNL(self, path): return sbool(self.nfrest('GET', '/op/import/zeusnl', None, dict([("path",path)])))
+    def importZeusNLresults(self, path): return sbool(self.nfrest('GET', '/op/import/zeusnlres', None, dict([("path",path)])))
     def is64bit(self): return sbool(self.nfrest('GET', '/op/is64bit', None, None))
     def isColumn(self, beamID): return sbool(self.nfrest('GET', '/element/iscolumn/'+qt(beamID)+'', None, None))
     def isNodeLoaded(self, node): return sbool(self.nfrest('GET', '/load/node/isloaded/'+qt(node)+'', None, None))
