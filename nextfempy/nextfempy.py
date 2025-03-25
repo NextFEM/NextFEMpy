@@ -11,9 +11,9 @@ def sbool(arg):
 
 def qt(s):
     try:
-        return urllib.parse.quote(s, safe='')
+        return str(urllib.parse.quote(s, safe=''))
     except:
-        return s
+        return str(s)
 
 class NextFEMrest:
     headers = {}
@@ -320,7 +320,9 @@ class NextFEMrest:
     def getLoad(self, i): return self.nfrest('GET', '/load/'+str(i)+'', None, None)
     def getLoadA(self, i): return json.loads(self.nfrest('GET', '/load/getA/'+str(i)+'', None, None))
     def getLoadcaseFactor(self, loadcase): return float(self.nfrest('GET', '/loadcase/getfactor/'+qt(loadcase)+'', None, None))
+    def getLoadCaseFunction(self, loadcase): return int(self.nfrest('GET', '/loadcase/getfunc/'+qt(loadcase)+'', None, None))
     def getLoadCases(self): return json.loads(self.nfrest('GET', '/loadcases', None, None))
+    def getLoadCaseType(self, name): return int(self.nfrest('GET', '/loadcase/gettype/'+qt(name)+'', None, None))
     def getLoadCombinations(self, includeEnvelopes=True): return json.loads(self.nfrest('GET', '/loadcase/combos/'+str(includeEnvelopes)+'', None, None))
     def getLoadDurationClass(self, loadcase): return int(self.nfrest('GET', '/load/getduration/'+qt(loadcase)+'', None, None))
     def getLoadingData(self): return self.nfrest('GET', '/model/loadingdata', None, None)
@@ -415,8 +417,8 @@ class NextFEMrest:
     def importSAP2000(self, path): return sbool(self.nfrest('GET', '/op/import/sap2000', None, dict([("path",path)])))
     def importSeismoStruct(self, path): return sbool(self.nfrest('GET', '/op/import/seismostruct', None, dict([("path",path)])))
     def importSismicad(self, path, lenUnit='cm', forceUnit='daN'): return sbool(self.nfrest('GET', '/op/import/sismicad'+qt(lenUnit)+'/'+qt(forceUnit)+'', None, dict([("path",path)])))
-    def importSismicadSects_Combo(self, path): return sbool(self.nfrest('GET', '/op/import/sismicadset', None, dict([("path",path)])))
     def importSismicadSects_Combo(self, text): return sbool(self.nfrest('POST', '/op/import/sismicadsettext', text, None))
+    def importSismicadSects_Combo(self, path): return sbool(self.nfrest('GET', '/op/import/sismicadset', None, dict([("path",path)])))
     def importSofistik(self, path): return sbool(self.nfrest('GET', '/op/import/sofistik', None, dict([("path",path)])))
     def importSR3(self, path): return sbool(self.nfrest('GET', '/op/import/sr3', None, dict([("path",path)])))
     def importSR4(self, path): return sbool(self.nfrest('GET', '/op/import/sr4', None, dict([("path",path)])))
@@ -774,6 +776,10 @@ class NextFEMrest:
     def resCalc_rebarHardeningRatio(self): return float(self.nfrest('GET','/op/opt/rescalc/rebhard'))
     @resCalc_rebarHardeningRatio.setter
     def resCalc_rebarHardeningRatio(self,value): self.nfrest('POST','/op/opt/rescalc/rebhard', heads={'val':str(value)})
+    @property
+    def resCalc_refinement(self): return sbool(self.nfrest('GET','/op/opt/calcrefinement'))
+    @resCalc_refinement.setter
+    def resCalc_refinement(self,value): self.nfrest('POST','/op/opt/calcrefinement', heads={'val':str(value)})
     @property
     def resCalc_resDomainSlices(self): return int(self.nfrest('GET','/op/opt/rescalc/domainslices'))
     @resCalc_resDomainSlices.setter
