@@ -169,7 +169,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/load/element/beamadd/'+qt(elem)+'/'+str(value1)+'/'+str(value2)+'/'+str(position1)+'/'+str(position2)+'/'+str(direction)+'/'+qt(loadcase)+'/'+str(local)+'', None, None))
-    def addBeamLoadA(self, elem, values, positions, direction, loadcase, local=False):
+    def addBeamLoadA(self, elem, values:list, positions:list, direction, loadcase, local=False):
         ''' Add a distributed load on the specified beam
         
         Args:
@@ -352,7 +352,7 @@ class NextFEMrest:
             The ID of the added spectral function
         '''
         return int(self.nfrest('GET', '/function/ec8spectrum/'+str(ag)+'/'+str(q)+'/'+qt(LS)+'/'+str(damping)+'/'+qt(soilType)+'/'+str(type1)+'', None, None))
-    def addEdgeLoad(self, elem, values, edge, direction, loadcase, local=False):
+    def addEdgeLoad(self, elem, values:list, edge, direction, loadcase, local=False):
         ''' Add a uniform or linear distributed load on the specified edge of planar element.
         
         Args:
@@ -367,7 +367,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/load/element/edgeadd/'+qt(elem)+'/'+str(edge)+'/'+str(direction)+'/'+qt(loadcase)+'/'+str(local)+'', values, None))
-    def addFillInSection(self, sectionID, x, y, material=0, doNotCenter=False):
+    def addFillInSection(self, sectionID, x:list, y:list, material=0, doNotCenter=False):
         ''' Add a filled figure in an already defined beam section
         
         Args:
@@ -406,7 +406,7 @@ class NextFEMrest:
             False if already existing, True otherwise
         '''
         return sbool(self.nfrest('GET', '/group/add/'+qt(name)+'', None, None))
-    def addHoleInSection(self, sectionID, x, y, material=0, doNotCenter=False):
+    def addHoleInSection(self, sectionID, x:list, y:list, material=0, doNotCenter=False):
         ''' Add and empty figure in an already defined beam section
         
         Args:
@@ -437,7 +437,7 @@ class NextFEMrest:
             ID of the added material
         '''
         return int(self.nfrest('GET', '/material/add/iso/'+qt(name)+'/'+str(E)+'/'+str(ni)+'/'+str(Wden)+'/'+str(fk)+'/'+str(conductivity)+'/'+str(specificHeat)+'/'+str(type)+'', None, None))
-    def addLayeredPlanarSection(self, layerThicknesses, layerMaterials):
+    def addLayeredPlanarSection(self, layerThicknesses:list, layerMaterials:list):
         ''' Add a new layered planar section to the model
         
         Args:
@@ -556,7 +556,7 @@ class NextFEMrest:
             ID of the added material, 0 if not found
         '''
         return int(self.nfrest('POST', '/material/add/fromlib', name, None))
-    def addMember(self, elems):
+    def addMember(self, elems:list):
         ''' Add a member in the model
         
         Args:
@@ -923,7 +923,7 @@ class NextFEMrest:
             ID of the added section, 0 if not found
         '''
         return int(self.nfrest('POST', '/section/add/fromlib/'+str(doNotCenter)+'', name, None))
-    def addSectionByPoints(self, x, y, CF_tw=0, CF_rc=0, material=0, doNotCenter=False):
+    def addSectionByPoints(self, x:list, y:list, CF_tw=0, CF_rc=0, material=0, doNotCenter=False):
         ''' Add a section by points. x() and y() are the 1st series of points (filled figure). If a cold-formed section is added, specify optional parameters.
         
         Args:
@@ -963,7 +963,7 @@ class NextFEMrest:
             The ID assigned to the section.
         '''
         return int(self.nfrest('GET', '/section/add/fromdxf/'+str(CF_tw)+'/'+str(CF_rc)+'/'+str(material)+'', None, dict([("path",path)])))
-    def addSeriesFunction(self, Xlist, Ylist, type, units=''):
+    def addSeriesFunction(self, Xlist:list, Ylist:list, type, units=''):
         ''' Add a time series function to the model
         
         Args:
@@ -993,7 +993,7 @@ class NextFEMrest:
             The ID of the time series
         '''
         return int(self.nfrest('GET', '/function/sine/'+str(frequency)+'/'+str(phase)+'/'+str(stp)+'/'+str(duration)+'/'+str(maxAmplitude)+'/'+str(isGrowing)+'/'+str(type)+'', None, dict([("units",units)])))
-    def addSolid(self, nodes, mat=0):
+    def addSolid(self, nodes:list, mat=0):
         ''' Add a solid element to the model. Element type is set on the size of the number of nodes
         
         Args:
@@ -1016,7 +1016,7 @@ class NextFEMrest:
             The ID of the added elem
         '''
         return self.nfrest('GET', '/element/add/spring/'+qt(n1)+'/'+qt(n2)+'/'+qt(propName)+'', None, None)
-    def addSpringNLProperty(self, name, NLdofs, NLprops, local=False):
+    def addSpringNLProperty(self, name, NLdofs:list, NLprops:list, local=False):
         ''' Add a non-linear spring property to the model
         
         Args:
@@ -1046,7 +1046,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/springproperty/simple/add/'+qt(name)+'/'+str(Kx)+'/'+str(Ky)+'/'+str(Kz)+'/'+str(Krx)+'/'+str(Kry)+'/'+str(Krz)+'/'+str(local)+'', None, None))
-    def addSpringsOnOverlappedNodes(self, n, propName):
+    def addSpringsOnOverlappedNodes(self, n:list, propName):
         ''' Add springs on selected overlapped nodes.
         
         Args:
@@ -1102,7 +1102,7 @@ class NextFEMrest:
             True is successful
         '''
         return sbool(self.nfrest('GET', '/section/rebar/stirrup/'+str(sectionID)+'/'+str(LnumY)+'/'+str(LnumZ)+'/'+str(area)+'/'+str(spacing)+'/'+str(matID)+'', None, None))
-    def addSubsoilNodalSpringsOnElements(self, n, propName):
+    def addSubsoilNodalSpringsOnElements(self, n:list, propName):
         ''' Add nodal subsoil springs in nodes of chosen planar elements.
         
         Args:
@@ -1124,7 +1124,7 @@ class NextFEMrest:
             The name of the property added, empty string in case of error
         '''
         return self.nfrest('GET', '/springproperty/subsoil/add/'+str(width)+'/'+str(Rmodulus)+'', None, None)
-    def addSurfaceLoad(self, elem, values, direction, loadcase, local=False):
+    def addSurfaceLoad(self, elem, values:list, direction, loadcase, local=False):
         ''' Add a uniformly distributed or bi-linear load on the specified face of planar element.
         
         Args:
@@ -1138,7 +1138,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/load/element/surfaceadd/'+qt(elem)+'/'+str(direction)+'/'+qt(loadcase)+'/'+str(local)+'', values, None))
-    def addThermalDistLoad(self, elem, values, loadcase):
+    def addThermalDistLoad(self, elem, values:list, loadcase):
         ''' Add thermal loads for strain-only loading in beams and shells
         
         Args:
@@ -1287,7 +1287,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/docx/appendimage/'+str(ratio)+'/'+str(alignment)+'', None, dict([("path",imagePath)])))
-    def appendDocXtext(self, text, alignment=0, color=0, bold=False, italic=False, underline=False):
+    def appendDocXtext(self, text:list, alignment=0, color=0, bold=False, italic=False, underline=False):
         ''' Append text to an already opened DocX document
         
         Args:
@@ -1302,7 +1302,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/op/docx/appendtext/'+str(alignment)+'/'+str(color)+'/'+str(bold)+'/'+str(italic)+'/'+str(underline)+'', text, None))
-    def applyButterworthFilter(self, values, samplingF, cutF, order, lowPass):
+    def applyButterworthFilter(self, values:list, samplingF, cutF, order, lowPass):
         ''' Apply Butterworth filter to the 2-columns input data
         
         Args:
@@ -1386,7 +1386,7 @@ class NextFEMrest:
             Boolean value
         '''
         return sbool(self.nfrest('GET', '/springproperty/subsoil/assign/'+qt(element)+'/'+qt(prop)+'', None, None))
-    def assignToGroup(self, name, nodes, elements, clear=False):
+    def assignToGroup(self, name, nodes:list, elements:list, clear=False):
         ''' Assign nodes and/or elements to a previously defined group
         
         Args:
@@ -1457,7 +1457,7 @@ class NextFEMrest:
             True if successful, False if path is missing
         '''
         return sbool(self.nfrest('GET', '/op/opt/changesolver/'+str(type)+'', None, dict([("path",path)])))
-    def changeSpringNLProperty(self, name, NLdofs, NLprops):
+    def changeSpringNLProperty(self, name, NLdofs:list, NLprops:list):
         ''' Change a non-linear spring property already defined in the model
         
         Args:
@@ -1469,7 +1469,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/springproperty/nl/change/'+qt(name)+'/'+json.dumps(NLdofs)+'', NLprops, None))
-    def changeSpringNLPropertyDof(self, name, DoF, NLtype, NLprops):
+    def changeSpringNLPropertyDof(self, name, DoF, NLtype, NLprops:list):
         ''' Change a non-linear spring property already defined in the model
         
         Args:
@@ -1509,7 +1509,7 @@ class NextFEMrest:
             True if check has been successful for all elements
         '''
         return sbool(self.nfrest('GET', '/op/mesh/connectivity'+str(notPassedElems)+'/'+str(overlappedNodes)+'', None, None))
-    def checkElement(self, elem, lc, t, stationType, verName, savelog=False, messages=False, defaultParams=None, logPath=None):
+    def checkElement(self, elem, lc, t, stationType, verName, savelog=False, messages=False, defaultParams:list=None, logPath=None):
         ''' Check a single element in a model against results.
         
         Args:
@@ -1527,7 +1527,7 @@ class NextFEMrest:
             True if checking is satisfied, False in any other case
         '''
         return sbool(self.nfrest('GET', '/res/check/element/'+qt(elem)+'/'+qt(lc)+'/'+qt(t)+'/'+str(stationType)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("logPath",logPath)])))
-    def checkElementRatio(self, elem, lc, t, stationType, verName, savelog=False, messages=False, defaultParams=None, logPath=None):
+    def checkElementRatio(self, elem, lc, t, stationType, verName, savelog=False, messages=False, defaultParams:list=None, logPath=None):
         ''' Check a single element in a model against results.
         
         Args:
@@ -1545,7 +1545,7 @@ class NextFEMrest:
             A value less than 1 if the element satisfies checking. 100 is returned in case of error
         '''
         return float(self.nfrest('GET', '/res/check/elementRatio/'+qt(elem)+'/'+qt(lc)+'/'+qt(t)+'/'+str(stationType)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("logPath",logPath)])))
-    def checkElements(self, elems, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams=None):
+    def checkElements(self, elems:list, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams:list=None):
         ''' Check the specified elements in a model against results.
         
         Args:
@@ -1562,7 +1562,7 @@ class NextFEMrest:
             True if all elements satisfy checking
         '''
         return sbool(self.nfrest('GET', '/res/check/elements/'+qt(lc)+'/'+qt(ts)+'/'+str(stationType)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("elems",json.dumps(elems))])))
-    def checkElementsRatio(self, elems, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams=None):
+    def checkElementsRatio(self, elems:list, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams:list=None):
         ''' Check the specified elements in a model against results.
         
         Args:
@@ -1579,7 +1579,7 @@ class NextFEMrest:
             A value less than 1 if all elements satisfy checking. 100 is returned in case of error
         '''
         return float(self.nfrest('GET', '/res/check/elementsRatio/'+qt(lc)+'/'+qt(ts)+'/'+str(stationType)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("elems",json.dumps(elems))])))
-    def checkElementStation(self, elem, lc, t, stationAbsissa, verName, defaultParams=None, logPath=None, messages=False):
+    def checkElementStation(self, elem, lc, t, stationAbsissa, verName, defaultParams:list=None, logPath=None, messages=False):
         ''' Check a single station in a model against results.
         
         Args:
@@ -1612,7 +1612,7 @@ class NextFEMrest:
             The number of meshed line elements
         '''
         return int(self.nfrest('GET', '/op/mesh/lineelems', None, None))
-    def checkModel(self, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams=None):
+    def checkModel(self, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams:list=None):
         ''' Check the entire model model with results.
         
         Args:
@@ -1628,7 +1628,7 @@ class NextFEMrest:
             True if checking is satisfied, False in any other case
         '''
         return sbool(self.nfrest('GET', '/res/check/model/'+qt(lc)+'/'+qt(ts)+'/'+str(stationType)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams))])))
-    def checkNode(self, node, lc, ts, verName, savelog=False, messages=False, defaultParams=None, logPath=None):
+    def checkNode(self, node, lc, ts, verName, savelog=False, messages=False, defaultParams:list=None, logPath=None):
         ''' Check a single node in a model against results.
         
         Args:
@@ -1645,7 +1645,7 @@ class NextFEMrest:
             True if node satisfies checking, False otherwise
         '''
         return sbool(self.nfrest('GET', '/res/check/node/'+qt(node)+'/'+qt(lc)+'/'+qt(ts)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("logPath",logPath)])))
-    def checkNodes(self, nodes, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams=None):
+    def checkNodes(self, nodes:list, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams:list=None):
         ''' Check specified nodes in a model against results.
         
         Args:
@@ -1726,7 +1726,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/res/check/cleardomains', None, None))
-    def colorizeModel(self, criterion, excl=None):
+    def colorizeModel(self, criterion, excl:list=None):
         ''' Colorize with random colors all the elements
         
         Args:
@@ -1737,7 +1737,7 @@ class NextFEMrest:
             
         '''
         return self.nfrest('GET', '/model/colors/colorize/'+str(criterion)+'', None, dict([("excl",json.dumps(excl))]))
-    def compileDocX(self, dict, tableDict=None, twoPasses=False):
+    def compileDocX(self, dict:list, tableDict:list=None, twoPasses=False):
         ''' Compile the open document for keyword substitution
         
         Args:
@@ -1782,7 +1782,7 @@ class NextFEMrest:
             Converted value
         '''
         return float(self.nfrest('GET', '/units/convert/'+str(value)+'', None, dict([("OldUnits",OldUnits),("NewUnits",NewUnits)])))
-    def createDocX(self, path, text, template=''):
+    def createDocX(self, path, text:list, template=''):
         ''' Create a DocX file with the desired text
         
         Args:
@@ -1794,7 +1794,7 @@ class NextFEMrest:
             Always true
         '''
         return sbool(self.nfrest('GET', '/op/docx/create'+json.dumps(text)+'', None, dict([("path",path),("template",template)])))
-    def customCheck(self, formulae):
+    def customCheck(self, formulae:list):
         ''' Run checking on user formulae on the selected node or element. See also getItemDataResults method.
         
         Args:
@@ -1861,7 +1861,7 @@ class NextFEMrest:
             An array containing the IDs of newly created Hexa elements
         '''
         return json.loads(self.nfrest('GET', '/op/mesh/dividehexa/'+qt(hexaID)+'/'+str(divX)+'/'+str(divY)+'/'+str(divZ)+'', None, None))
-    def divideLine(self, lines, fractions):
+    def divideLine(self, lines:list, fractions:list):
         ''' Divide existing Line elements
         
         Args:
@@ -1872,7 +1872,7 @@ class NextFEMrest:
             An array containing the IDs of newly created Line elements
         '''
         return json.loads(self.nfrest('GET', '/op/mesh/divideline', None, dict([("lines",json.dumps(lines)),("fractions",json.dumps(fractions))])))
-    def divideLineByNodes(self, line, nodes):
+    def divideLineByNodes(self, line, nodes:list):
         ''' Divide existing Line elements by nodes
         
         Args:
@@ -1969,7 +1969,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/export/opensees/'+qt(loadcase)+'', None, dict([("path",path)])))
-    def exportRCbeamsDXF(self, path, elements):
+    def exportRCbeamsDXF(self, path, elements:list):
         ''' Export the selected RC beam to DXF format. Rebars and hoops will be inserted in DXF, if present
         
         Args:
@@ -2098,7 +2098,7 @@ class NextFEMrest:
             A list of nodal IDs
         '''
         return json.loads(self.nfrest('GET', '/op/mesh/alignednodes/'+str(tol)+'', None, dict([("n1",n1),("n2",n2)])))
-    def getAreaByNodes(self, nodes):
+    def getAreaByNodes(self, nodes:list):
         ''' Get area from the selected nodes
         
         Args:
@@ -2307,7 +2307,7 @@ class NextFEMrest:
             ID of node. -1 if not found
         '''
         return self.nfrest('GET', '/op/controlnode', None, None)
-    def getCornerNodes(self, nodes, lcs):
+    def getCornerNodes(self, nodes:list, lcs:list):
         ''' Return the corner nodes in a list of nodes
         
         Args:
@@ -2328,7 +2328,7 @@ class NextFEMrest:
             False if the key was not found
         '''
         return self.nfrest('GET', '/model/customdata/'+qt(key)+'', None, None)
-    def getDataPlot(self, xseries, yseries, imagePath, name='', Xunits='', Yunits=''):
+    def getDataPlot(self, xseries:list, yseries:list, imagePath, name='', Xunits='', Yunits=''):
         ''' Get plot of the given user data
         
         Args:
@@ -2343,7 +2343,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/function/plotdata/'+qt(name)+'', None, dict([("path",imagePath),("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
-    def getDataPlot(self, xseries, yseries, transparent, name='', Xunits='', Yunits='', color=-7667573, useDots=True):
+    def getDataPlot(self, xseries:list, yseries:list, transparent, name='', Xunits='', Yunits='', color=-7667573, useDots=True):
         ''' Get plot of the given user data as array of bytes
         
         Args:
@@ -2996,7 +2996,7 @@ class NextFEMrest:
             An array of length 2 containing max and min force for the desired type
         '''
         return json.loads(self.nfrest('GET', '/res/maxminbeamforces/'+str(sectionID)+'/'+str(type)+'', None, None))
-    def getMaxMinNodeDispl(self, dir, nodes=None):
+    def getMaxMinNodeDispl(self, dir, nodes:list=None):
         ''' Get maximum and minimum nodal displacement from all nodal results.
         
         Args:
@@ -3214,7 +3214,7 @@ class NextFEMrest:
             
         '''
         return json.loads(self.nfrest('GET', '/group/nodes/'+qt(name)+'', None, None))
-    def getNodesOnSides(self, nodes, tol=4.94065645841247E-324):
+    def getNodesOnSides(self, nodes:list, tol=4.94065645841247E-324):
         ''' Get nodes on borders of the selected rectangular shell region
         
         Args:
@@ -3521,7 +3521,7 @@ class NextFEMrest:
             An array of size 2 with VrdY and VrdZ
         '''
         return json.loads(self.nfrest('GET', '/op/sectioncalc/shear/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', None, None))
-    def getSectionResShearDict(self, sectionID, verName, N=0, Mzz=0, Myy=0, Vy=0, Vz=0, overrideValues=None):
+    def getSectionResShearDict(self, sectionID, verName, N=0, Mzz=0, Myy=0, Vy=0, Vz=0, overrideValues:list=None):
         ''' Get section shear resistance
         
         Args:
@@ -3584,7 +3584,7 @@ class NextFEMrest:
             String value
         '''
         return self.nfrest('GET', '/op/sep', None, None)
-    def getShearResFromDict(self, dict):
+    def getShearResFromDict(self, dict:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
         Args:
@@ -3594,7 +3594,7 @@ class NextFEMrest:
             An array of size 2 with VrdY and VrdZ
         '''
         return json.loads(self.nfrest('GET', '/op/sectioncalc/shearres', dict, None))
-    def getShearResFromDict(self, dict):
+    def getShearResFromDict(self, dict:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
         Args:
@@ -3797,7 +3797,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/midasfile', None, dict([("path",path)])))
-    def importMidas(self, model):
+    def importMidas(self, model:list):
         ''' Import a Midas GEN/Civil model in text format
         
         Args:
@@ -3817,7 +3817,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/midasresult', None, dict([("path",path)])))
-    def importMidasResults(self, text):
+    def importMidasResults(self, text:list):
         ''' Read results from Midas GEN/Civil tables, copied to a text file
         
         Args:
@@ -3921,7 +3921,7 @@ class NextFEMrest:
             Always true
         '''
         return sbool(self.nfrest('GET', '/op/import/sismicadset', None, dict([("path",path)])))
-    def importSismicadSects_Combo(self, text):
+    def importSismicadSects_Combo(self, text:list):
         ''' Read section definitions and combinations from Sismicad tables, in TXT format
         
         Args:
@@ -3991,7 +3991,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/straus7result', None, dict([("path",path)])))
-    def importStrausResults(self, text):
+    def importStrausResults(self, text:list):
         ''' Read results from Straus7 tables, copied to a text file
         
         Args:
@@ -4132,7 +4132,7 @@ class NextFEMrest:
             The name of the new loadcase created
         '''
         return self.nfrest('GET', '/loadcase/fromcombo/'+qt(comboName)+'', None, None)
-    def mergeImportedLines(self, lineIDs):
+    def mergeImportedLines(self, lineIDs:list):
         ''' Merge selected Line elements with imported results
         
         Args:
@@ -4142,7 +4142,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/op/mesh/mergeimportedlines', None, dict([("lines",json.dumps(lineIDs))])))
-    def mergeLines(self, lineIDs):
+    def mergeLines(self, lineIDs:list):
         ''' Merge selected Line elements
         
         Args:
@@ -4180,7 +4180,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/op/mesh/mergenodes', None, None))
-    def meshAreaTria(self, filledContour, emptyContour, maxTriaArea, useAllNodes=False, belt=0, useQuad=False, minAngle=20):
+    def meshAreaTria(self, filledContour:list, emptyContour:list, maxTriaArea, useAllNodes=False, belt=0, useQuad=False, minAngle=20):
         ''' Mesh a planar area with triangular or quadrilateral elements
         
         Args:
@@ -4196,7 +4196,7 @@ class NextFEMrest:
             An array containing the IDs of newly created Tria elements
         '''
         return json.loads(self.nfrest('GET', '/op/mesh/tria/'+str(maxTriaArea)+'/'+str(useAllNodes)+'/'+str(belt)+'/'+str(useQuad)+'/'+str(minAngle)+'', None, dict([("filled",json.dumps(filledContour)),("empty",json.dumps(emptyContour))])))
-    def meshAreaTriaMulti(self, filledContour, emptyContour, maxTriaArea, useAllNodes=False, belt=0, useQuad=False, minAngle=20):
+    def meshAreaTriaMulti(self, filledContour:list, emptyContour:list, maxTriaArea, useAllNodes=False, belt=0, useQuad=False, minAngle=20):
         ''' Mesh planar areas with triangular or quadrilateral elements. This function has to be used when defined more than one hole per meshed region.
         
         Args:
@@ -4212,7 +4212,7 @@ class NextFEMrest:
             An array containing the IDs of newly created Tria elements
         '''
         return json.loads(self.nfrest('GET', '/op/mesh/triamulti/'+str(maxTriaArea)+'/'+str(useAllNodes)+'/'+str(belt)+'/'+str(useQuad)+'/'+str(minAngle)+'', None, dict([("filled",json.dumps(filledContour)),("empty",json.dumps(emptyContour))])))
-    def meshQuad2Wall(self, quadIDs, isHorizontal=False):
+    def meshQuad2Wall(self, quadIDs:list, isHorizontal=False):
         ''' Mesh and group into wall a single quad element.
         
         Args:
@@ -4233,7 +4233,7 @@ class NextFEMrest:
             ID of the newly added section
         '''
         return self.nfrest('GET', '/model/model2section', None, dict([("path",openModelPath)]))
-    def moveNodes(self, nodes, displX, displY, displZ, absolutePosition=False):
+    def moveNodes(self, nodes:list, displX, displY, displZ, absolutePosition=False):
         ''' Move nodes
         
         Args:
@@ -4400,7 +4400,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('DELETE', '/element/'+qt(ID)+'', None, None))
-    def removeElementsFromMember(self, member, elems):
+    def removeElementsFromMember(self, member, elems:list):
         ''' Remove the specified elements from a member
         
         Args:
@@ -4699,7 +4699,7 @@ class NextFEMrest:
             
         '''
         return self.nfrest('GET', '/op/undo/'+str(ustate)+'', None, None)
-    def rotateNodes(self, nodes, axisX, axisY, axisZ, angle):
+    def rotateNodes(self, nodes:list, axisX, axisY, axisZ, angle):
         ''' Rotate nodes by moving them
         
         Args:
@@ -4793,7 +4793,7 @@ class NextFEMrest:
             True if successed
         '''
         return sbool(self.nfrest('GET', '/op/sectioncalc/imagewithbars/'+qt(elemID)+'/'+str(progr)+'', None, dict([("path",path)])))
-    def scaleNodes(self, nodes, scaleX, scaleY, scaleZ, scaleCenterX=0, scaleCenterY=0, scaleCenterZ=0):
+    def scaleNodes(self, nodes:list, scaleX, scaleY, scaleZ, scaleCenterX=0, scaleCenterY=0, scaleCenterZ=0):
         ''' Scale nodes
         
         Args:
@@ -4918,7 +4918,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/loadcase/setpsi/'+str(subscript)+'/'+str(type)+'/'+str(value)+'', None, None))
-    def setCombinationFactors(self, gG, gQ, psiVar=None, psiWind=None, psiSnow=None, gSW=0):
+    def setCombinationFactors(self, gG, gQ, psiVar:list=None, psiWind:list=None, psiSnow:list=None, gSW=0):
         ''' Set or change combination factors
         
         Args:
@@ -5047,7 +5047,7 @@ class NextFEMrest:
             Boolean value
         '''
         return sbool(self.nfrest('GET', '/section/'+qt(elem)+'/'+str(sectID)+'', None, None))
-    def setEndRelease(self, beamID, node, DOFmask, useStiffness=False):
+    def setEndRelease(self, beamID, node, DOFmask:list, useStiffness=False):
         ''' Assign an end release to a beam element by specifying its force percentage or joint stiffness.
         
         Args:
@@ -5117,7 +5117,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/load/floor/set/'+qt(name)+'/'+qt(loadcase)+'/'+str(loadvalue)+'/'+str(dirX)+'/'+str(dirY)+'/'+str(dirZ)+'', None, None))
-    def setFunctionGeneralData(self, funcID, data):
+    def setFunctionGeneralData(self, funcID, data:list):
         ''' Set custom data stored in the selected function
         
         Args:
@@ -5138,7 +5138,7 @@ class NextFEMrest:
             
         '''
         return self.nfrest('POST', '/op/opt/lang/'+qt(code)+'', None, None)
-    def setLoadA(self, load):
+    def setLoadA(self, load:list):
         ''' Modify an existing load through an array, conforming to the one got via getLoadA
         
         Args:
@@ -5295,7 +5295,7 @@ class NextFEMrest:
             True if imported successfully
         '''
         return sbool(self.nfrest('GET', '/res/import/nodecheck/'+qt(ID)+'/'+qt(lc)+'/'+qt(time)+'/'+str(setContour)+'', None, dict([("data",data)])))
-    def setNodeCoordinates(self, ID, coords):
+    def setNodeCoordinates(self, ID, coords:list):
         ''' Set node coordinates as double array
         
         Args:
@@ -5358,7 +5358,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/loadcase/setrs/'+str(direction)+'/'+qt(loadcase)+'/'+str(modesNumber)+'/'+str(spectrumFuncID)+'/'+str(modalDamping)+'/'+str(factor)+'', None, None))
-    def setRigidDiaphragms(self, constraintType=0, nodesList=None, masterNode='', restrainZMaster=False):
+    def setRigidDiaphragms(self, constraintType=0, nodesList:list=None, masterNode='', restrainZMaster=False):
         ''' Set rigid diaphragms for all model. Floors heigths are taken automatically, restrained floors are skipped.
         
         Args:
@@ -5382,7 +5382,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('PUT', '/op/mesh/rigidlink/'+qt(n1)+'/'+qt(n2)+'', None, None))
-    def setRigidOffsets(self, beamID, values, isAbsLength=False):
+    def setRigidOffsets(self, beamID, values:list, isAbsLength=False):
         ''' Assign rigid offsets to beam.
         
         Args:
@@ -5518,7 +5518,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/load/setswdir/'+str(direction)+'', None, None))
-    def setShearReinfRCdata(self, ID, data):
+    def setShearReinfRCdata(self, ID, data:list):
         ''' Set or overwrite material data for shear reinforcement with tension-fragile design material in RC section. Set Shear strip width less than or equal to 0 to remove data
         
         Args:
@@ -5529,7 +5529,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/section/set/shearreinfrc/'+str(ID)+'', None, dict([("data",json.dumps(data))])))
-    def setShellEndRelease(self, ID, node, DOFmask):
+    def setShellEndRelease(self, ID, node, DOFmask:list):
         ''' Set end release for shell element
         
         Args:
@@ -5597,7 +5597,7 @@ class NextFEMrest:
             Boolean value
         '''
         return sbool(self.nfrest('GET', '/units/set/'+qt(length)+'/'+qt(force)+'', None, None))
-    def setWall(self, elems, rotate90=False, isSlab=False):
+    def setWall(self, elems:list, rotate90=False, isSlab=False):
         ''' Create a wall for design, including 3 section cuts, from the selected planar elements
         
         Args:
