@@ -2420,7 +2420,7 @@ class NextFEMrest:
         '''
         return json.loads(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
     def getElementArea(self, ID):
-        ''' Get element area of planar elemnts or surface for solids
+        ''' Get element area of planar elements or surface for solids
         
         Args:
             ID: 
@@ -5730,7 +5730,7 @@ class NextFEMrest:
         '''   Get the system of equation type in standard solver. The property is read-only, use changeDefSolverType to modify it   '''
         return int(self.nfrest('GET','/op/opt/defsolvertype'))
     @property
-    def designMaterialsID(self):
+    def designMaterialsID(self)->list:
         '''   Get the list of design material IDs   '''
         return json.loads(self.nfrest('GET','/designmaterials'))
     @property
@@ -5758,11 +5758,11 @@ class NextFEMrest:
         '''   Change table aligment: 0=left, 1=center, 2=right, 3=justified. Default is 1   '''
         self.nfrest('POST','/op/docx/tablealign', heads={'val':str(value)})
     @property
-    def DocXtableBorders(self):
+    def DocXtableBorders(self)->list:
         '''   Change table borders: True=border present, False=no border. Default is True for all sides.   '''
         return json.loads(self.nfrest('GET','/op/docx/tableborders'))
     @DocXtableBorders.setter
-    def DocXtableBorders(self,value):
+    def DocXtableBorders(self,value:list):
         '''   Change table borders: True=border present, False=no border. Default is True for all sides.   '''
         self.nfrest('POST','/op/docx/tableborders', heads={'val':str(value)})
     @property
@@ -5806,7 +5806,7 @@ class NextFEMrest:
         '''   Get or set a JSON string containing options for DXF export of RC beams and members   '''
         self.nfrest('POST','/op/opt/dxfoptions', heads={'val':str(value)})
     @property
-    def elemsList(self):
+    def elemsList(self)->list:
         '''   Get the list of element numbers   '''
         return json.loads(self.nfrest('GET','/elements'))
     @property
@@ -5882,7 +5882,7 @@ class NextFEMrest:
         '''   Change color for mass   '''
         self.nfrest('POST','/model/colors/mass', heads={'val':str(value)})
     @property
-    def materialsID(self):
+    def materialsID(self)->list:
         '''   Get the list of material IDs   '''
         return json.loads(self.nfrest('GET','/materials'))
     @property
@@ -5922,7 +5922,7 @@ class NextFEMrest:
         '''   Change color for nodes   '''
         self.nfrest('POST','/model/colors/node', heads={'val':str(value)})
     @property
-    def nodesList(self):
+    def nodesList(self)->list:
         '''   Get the list of node numbers   '''
         return json.loads(self.nfrest('GET','/nodes'))
     @property
@@ -6130,7 +6130,7 @@ class NextFEMrest:
         '''   Get or set flag for saving state variables in NXF file   '''
         self.nfrest('POST','/op/opt/os/statevars', heads={'val':str(value)})
     @property
-    def sectionsID(self):
+    def sectionsID(self)->list:
         '''   Get the list of section IDs   '''
         return json.loads(self.nfrest('GET','/sections'))
     @property
@@ -6142,19 +6142,19 @@ class NextFEMrest:
         '''   Change color for selected areas   '''
         self.nfrest('POST','/model/colors/selarea', heads={'val':str(value)})
     @property
-    def selectedElements(self):
+    def selectedElements(self)->list:
         '''   Get or set selected elements in viewport. REST version only against local instance of NextFEM Designer   '''
         return json.loads(self.nfrest('GET','/op/selectedelements'))
     @selectedElements.setter
-    def selectedElements(self,value):
+    def selectedElements(self,value:list):
         '''   Get or set selected elements in viewport. REST version only against local instance of NextFEM Designer   '''
         self.nfrest('POST','/op/selectedelements', heads={'val':str(value)})
     @property
-    def selectedNodes(self):
+    def selectedNodes(self)->list:
         '''   Get or set selected nodes in viewport. REST version only against local instance of NextFEM Designer   '''
         return json.loads(self.nfrest('GET','/op/selectednodes'))
     @selectedNodes.setter
-    def selectedNodes(self,value):
+    def selectedNodes(self,value:list):
         '''   Get or set selected nodes in viewport. REST version only against local instance of NextFEM Designer   '''
         self.nfrest('POST','/op/selectednodes', heads={'val':str(value)})
     @property
