@@ -120,6 +120,17 @@ class NextFEMrest:
             return f"Error in sending file: {str(e)}"
         finally:
             files['file'][1].close()
+    # get file list from server fo current user
+    def userFiles(self)->list:
+        ''' Get file list from server for current user
+        
+        Returns:
+            List of files
+        '''
+        try:
+            return json.loads(self.nfrest('GET', '/op/userfiles', None, None))
+        except Exception as e:
+            return ["User not logged-in"]
 
     # methods and properties
     def activeBarsDiameters(self):
@@ -1264,17 +1275,17 @@ class NextFEMrest:
             The path of the newly created model or, if checking is required, an array containing "Element-Station", "N", "Vy", "Vz", "Myy", "Mzz", "Ratio-NMM", "Ratio-V", path
         '''
         return json.loads(self.nfrest('GET', '/res/check/analyzefire/'+qt(elem)+'/'+str(endTime)+'/'+str(beamExposure)+'/'+str(columnExposure)+'/'+qt(checkCombo)+'/'+str(selectForcesCrit)+'/'+str(fireCurve)+'/'+str(outOfProc)+'/'+str(noWindow)+'/'+str(customFireCurve)+'', None, None))
-    def appendDocXformula(self, TeXcode, alignment=0):
-        ''' Append and render a formula from LaTeX to an already opened DocX document. By default, this is aligned to center.
+    def appendDocXformula(self, formula, alignment=0):
+        ''' Append and render a formula in Ascii syntax to an already opened DocX document. By default, this is aligned to center.
         
         Args:
-            TeXcode: LaTeX code for formula
+            formula: Ascii formula text
             alignment (optional): Optional, default is 1. 0=left, 1=center, 2=right, 3=justified
 
         Returns:
             Boolean
         '''
-        return sbool(self.nfrest('POST', '/op/docx/appendformula/'+str(alignment)+'', TeXcode, None))
+        return sbool(self.nfrest('POST', '/op/docx/appendformula/'+str(alignment)+'', formula, None))
     def appendDocXimage(self, imagePath, ratio=1, alignment=0):
         ''' Append image to an already opened DocX document. By default, this is aligned to center.
         
@@ -1795,7 +1806,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/op/docx/create'+json.dumps(text)+'', None, dict([("path",path),("template",template)])))
     def customCheck(self, formulae:list):
-        ''' Run checking on user formulae on the selected node or element. See also getItemDataResults method.
+        ''' Run checking on user formulae. No node or element quantities are given. See also getItemDataResults method.
         
         Args:
             formulae: Dictionary of string and decimal containing formulae (see NextFEM Scripting language reference)
@@ -1830,6 +1841,16 @@ class NextFEMrest:
             True if operations goes fine.
         '''
         return sbool(self.nfrest('GET', '/res/delchecks', None, None))
+    def deleteDocXheadings(self, headingsIDtoDelete:list):
+        ''' Remove the paragraphs contained in the specified titles
+        
+        Args:
+            headingsIDtoDelete: Array of paragraph IDs to be deleted
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/op/docx/delheadings', headingsIDtoDelete, None))
     def deleteGroup(self, name):
         ''' Remove the specified group from model
         
@@ -1939,7 +1960,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/op/export/ifc/'+str(saveAsXML)+'', None, dict([("path",path)])))
     def exportIOM(self, filename):
-        ''' Export model to IDEA StatiCa Open Model format
+        ''' Export model to IDEA StatiCa Open Model format. It generates filename.xml and filename.xmlR for results, if any.
         
         Args:
             filename: Full path for the output model in XML format.
@@ -1991,6 +2012,16 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/model/member/exportdxf/'+qt(member)+'', None, dict([("path",path)])))
+    def exportSAF(self, path):
+        ''' Export structural model in SAF file
+        
+        Args:
+            path: Full path of SAF .xlsx file
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/op/export/saf', None, dict([("path",path)])))
     def exportSAP2000(self, path):
         ''' Export model in S2K format for SAP2000
         
@@ -2216,6 +2247,18 @@ class NextFEMrest:
             A check structure with positions and values
         '''
         return self.nfrest('GET', '/res/beamdiagram/'+qt(num)+'/'+qt(loadcase)+'/'+str(type)+'/'+str(offsetL)+'/'+str(numStations)+'/'+qt(time)+'', None, None)
+    def getBeamForcesEnvelopeTable(self, num, stationsMode, loadcases:list=None):
+        ''' Get beam forces consistent envelope, as a table. Envelopes are made on specified loadcases, or on all result cases. Suitable for many combinations or for time-history analyses.
+        
+        Args:
+            num: Element no.
+            stationsMode: 0 for 5 stations, 1 for 3 stations, 2 for I and J, 3 for I only, 4 for J only, 5 for M only, 6 for 1/4, 7 for 3/4, 8 for M and 1/4 and 3/4, 9 for 1/4 and 3/4
+            loadcases (optional): Array of reference loadcases.
+
+        Returns:
+            A table as a list of string arrays.
+        '''
+        return json.loads(self.nfrest('GET', '/res/beamforcesenvtable/'+qt(num)+'/'+str(stationsMode)+'', loadcases, None))
     def getBeamResMoments(self, elemID):
         ''' Get the beam resisting moments for each direction of a beam
         
@@ -2328,22 +2371,7 @@ class NextFEMrest:
             False if the key was not found
         '''
         return self.nfrest('GET', '/model/customdata/'+qt(key)+'', None, None)
-    def getDataPlot(self, xseries:list, yseries:list, imagePath, name='', Xunits='', Yunits=''):
-        ''' Get plot of the given user data
-        
-        Args:
-            xseries: X series of user data
-            yseries: Y series of user data
-            imagePath: Path of the image to be written
-            name (optional): Optional. Title of the plot
-            Xunits (optional): Optional. Units for x axis
-            Yunits (optional): Optional. Units for y axis
-
-        Returns:
-            True if successful
-        '''
-        return sbool(self.nfrest('GET', '/function/plotdata/'+qt(name)+'', None, dict([("path",imagePath),("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
-    def getDataPlot(self, xseries:list, yseries:list, transparent, name='', Xunits='', Yunits='', color=-7667573, useDots=True):
+    def getDataPlot(self, xseries:list, yseries:list, transparent, name='', Xunits='', Yunits='', color=0, useDots=True):
         ''' Get plot of the given user data as array of bytes
         
         Args:
@@ -2353,13 +2381,13 @@ class NextFEMrest:
             name (optional): Optional. Title of the plot
             Xunits (optional): Optional. Units for x axis
             Yunits (optional): Optional. Units for y axis
-            color (optional): Optional. Default is -7667573 (dark magenta)
+            color (optional): Optional. Default is 0 (black)
             useDots (optional): Optional. Default is false
 
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/function/plotdataB/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
+        return json.loads(self.nfrest('GET', '/function/plotdata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
     def getDefinedDesignMaterials(self):
         ''' Return a list of used design material IDs
         
@@ -2419,6 +2447,14 @@ class NextFEMrest:
             Array of strings
         '''
         return json.loads(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
+    def getDocXheadings(self):
+        ''' Get a list of headings contained in the current DocX document.
+        
+        
+        Returns:
+            List of array of strings as (ID, level, title)
+        '''
+        return json.loads(self.nfrest('GET', '/op/docx/headings', None, None))
     def getElementArea(self, ID):
         ''' Get element area of planar elements or surface for solids
         
@@ -2786,6 +2822,17 @@ class NextFEMrest:
             A list of vert3 containing 3D points of the domain boundary
         '''
         return json.loads(self.nfrest('GET', '/res/check/plot3dsectiondomain'+str(conn)+'', None, None))
+    def getLastSectionResDomainPoints(self, domainType, cleanResponseTolerance=0):
+        ''' Get list of points for plotting resisting domain of the last computed sections
+        
+        Args:
+            domainType: 0 for Myy vs. Mzz, 1 for N vs. Myy, 2 for N vs. Mzz
+            cleanResponseTolerance (optional): Optional, default is 0. Clean points given in N-Mxx domains, to be used only if wrong plot is obtained (e.g. set to 1e-8)
+
+        Returns:
+            A list of array of double values, each of size 2 (X,Y)
+        '''
+        return json.loads(self.nfrest('GET', '/res/check/lastplotsectiondomain/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
     def getLenUnit(self):
         ''' Get the unit for length in the model
         
@@ -3076,6 +3123,23 @@ class NextFEMrest:
             loadcase parameters is passed by reference, hence the selected loadcase is returned if loadcase is empty
         '''
         return int(self.nfrest('GET', '/res/modes/'+str(loadcase)+'', None, None))
+    def getMultiplePlots(self, plotList:list, transparent=False, names:list=None, Xunits='', Yunits='', colors:list=None, useDots:list=None, showLegend=False):
+        ''' Get plots of multiple series in a single image
+        
+        Args:
+            plotList: List of list of double[2] arrays
+            transparent (optional): If true, set transparent background
+            names (optional): Optional. Titles of the plots
+            Xunits (optional): Optional. Units for x axis
+            Yunits (optional): Optional. Units for y axis
+            colors (optional): Optional. Array of plot colors
+            useDots (optional): Optional. Array of boolean values for using dots in each plot
+            showLegend (optional): Optional. True to enable graph legend
+
+        Returns:
+            List of arrays of bytes
+        '''
+        return json.loads(self.nfrest('GET', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)])))
     def getNodalDisp(self, num, loadcase, time, direction):
         ''' Get nodal displacement from the selected loadcase and time
         
@@ -3339,7 +3403,7 @@ class NextFEMrest:
             A 2-dimensional array of double
         '''
         return json.loads(self.nfrest('GET', '/section/figure/'+str(sectionID)+'/'+str(figureID)+'/'+str(isHole)+'', None, None))
-    def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False):
+    def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False, selectedBar=0):
         ''' Get section plot into an array of Bytes of Png image
         
         Args:
@@ -3352,11 +3416,12 @@ class NextFEMrest:
             showAxes (optional): Optional, default true
             showOrigin (optional): Optional, default 0. 1 to show Z and Y arrows, 2 for X and Y arrows
             transparent (optional): Optional, default false. If true, set transparent background
+            selectedBar (optional): Optional, default 0. Index of rebar to highlight, 0 to remove highlightning. Set to -1 to remove bars and show section center
 
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None))
+        return json.loads(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None))
     def getSectionOffset(self, ID):
         ''' Get the section offset for selected beam element
         
@@ -3662,6 +3727,14 @@ class NextFEMrest:
             Return nothing if empty results
         '''
         return json.loads(self.nfrest('GET', '/res/periods/'+qt(lc)+'', None, None))
+    def getUserViews(self):
+        ''' Get a list of names of user-defined model views
+        
+        
+        Returns:
+            An array of strings
+        '''
+        return json.loads(self.nfrest('GET', '/model/userviews', None, None))
     def getVersion(self):
         ''' Get API version
         
@@ -4256,7 +4329,7 @@ class NextFEMrest:
         '''
         return self.nfrest('GET', '/op/new', None, None)
     def openIDEAcodeCheck(self):
-        ''' Open IDEA Code Check Manager, if installed. Only for local instance of NextFEM Designer
+        ''' Open IDEA CheckBot, if installed. Only for local instances of NextFEM Designer
         
         
         Returns:
@@ -4737,21 +4810,23 @@ class NextFEMrest:
         '''
         return self.nfrest('GET', '/op/run/'+str(outOfProc)+'/'+str(noWindow)+'', None, None)
     def saveDocX(self):
-        ''' Save the current DocX document to a file
+        ''' Save the current DocX document to a file. After saving, the document cannot be modified.
         
         
         Returns:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/docx/save', None, None))
-    def saveDocXbytes(self):
-        ''' Save the current DocX document to an array of bytes
+    def saveDocXbytes(self, readOnlyPassword=''):
+        ''' Save the current DocX document to an array of bytes. After saving, the document cannot be modified.
         
-        
+        Args:
+            readOnlyPassword (optional): Set a read-only password for the document. If the password start with 'u_', unlocking is not possible
+
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/op/docx/bytes', None, None))
+        return json.loads(self.nfrest('GET', '/op/docx/bytes', readOnlyPassword, None))
     def saveModel(self, filename):
         ''' Save the model and results with desired name
         
@@ -5621,6 +5696,17 @@ class NextFEMrest:
             
         '''
         return sbool(self.nfrest('GET', '/op/showvieport/'+qt(path)+'/'+str(width)+'/'+str(height)+'', None, None))
+    def userCheck(self, verName, overrideValues:list=None):
+        ''' Run checking on user script. No node or element quantities are given. See also getItemDataResults method.
+        
+        Args:
+            verName: Name of the checking to be used
+            overrideValues (optional): Optional dictionary of {string, double} containing overrides for checking
+
+        Returns:
+            
+        '''
+        return json.loads(self.nfrest('POST', '/res/check/user'+qt(verName)+'', overrideValues, None))
     def valueFromFunction(self, Xval, funcID):
         ''' Get the value of the selected function corresponding to the desired abscissa
         
@@ -5741,14 +5827,6 @@ class NextFEMrest:
     def DocXfontSize(self,value):
         '''   Change font size for DocX reporting tool. Default is 8   '''
         self.nfrest('POST','/op/docx/fontsize', heads={'val':str(value)})
-    @property
-    def DocXformulaResolution(self):
-        '''   Change formula resolution for DocX reporting tool. This is an integer value. Default is 4   '''
-        return int(self.nfrest('GET','/op/docx/formularesol'))
-    @DocXformulaResolution.setter
-    def DocXformulaResolution(self,value):
-        '''   Change formula resolution for DocX reporting tool. This is an integer value. Default is 4   '''
-        self.nfrest('POST','/op/docx/formularesol', heads={'val':str(value)})
     @property
     def DocXtableAlignment(self):
         '''   Change table aligment: 0=left, 1=center, 2=right, 3=justified. Default is 1   '''
@@ -6041,6 +6119,14 @@ class NextFEMrest:
     def resCalc_elasticTolerance(self,value):
         '''   Tolerance for elastic strength calculation of a section   '''
         self.nfrest('POST','/op/opt/rescalc/eltoll', heads={'val':str(value)})
+    @property
+    def resCalc_getAllJSONresults(self):
+        '''   Get or set a flag to get all results in JSON from getSectionResMoments method   '''
+        return sbool(self.nfrest('GET','/op/opt/rescalc/allresjson'))
+    @resCalc_getAllJSONresults.setter
+    def resCalc_getAllJSONresults(self,value):
+        '''   Get or set a flag to get all results in JSON from getSectionResMoments method   '''
+        self.nfrest('POST','/op/opt/rescalc/allresjson', heads={'val':str(value)})
     @property
     def resCalc_homogBarsFactor(self):
         '''   Set custom homogenization factor for bars in concrete sections   '''
