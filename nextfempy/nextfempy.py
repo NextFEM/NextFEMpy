@@ -15,6 +15,32 @@ def qt(s):
     except:
         return str(s)
 
+class vert3:
+    def __init__(self, *args, _num="0"):
+        self.num = _num
+        self.X = 0.0
+        self.Y = 0.0
+        self.Z = 0.0
+        if len(args) == 3:
+            self.X, self.Y, self.Z = args
+        elif len(args) == 1 and isinstance(args[0], (list, tuple)):
+            arr = args[0]
+            for i in range(min(3, len(arr))):
+                if i == 0:
+                    self.X = arr[i]
+                elif i == 1:
+                    self.Y = arr[i]
+                elif i == 2:
+                    self.Z = arr[i]
+
+    def to_dict(self):
+        return {
+            "num": self.num,
+            "X": self.X,
+            "Y": self.Y,
+            "Z": self.Z
+        }
+    
 class NextFEMrest:
     headers = {}
 
@@ -2455,6 +2481,16 @@ class NextFEMrest:
             List of array of strings as (ID, level, title)
         '''
         return json.loads(self.nfrest('GET', '/op/docx/headings', None, None))
+    def getDXFentities(self, stream):
+        ''' Get drawing entities in the loaded DXF serialized in JSON format
+        
+        Args:
+            stream: Stream to be imported
+
+        Returns:
+            String in JSON format
+        '''
+        return self.nfrest('POST', '/op/import/dxfentities', stream, None)
     def getElementArea(self, ID):
         ''' Get element area of planar elements or surface for solids
         
@@ -2771,7 +2807,7 @@ class NextFEMrest:
         ''' Get properties and results for the selected node or element
         
         Args:
-            item: ID of the item (node or element) to be checked. If item is an element, specifiy a non-zero station
+            item: ID of the item (node or element) to be checked. If item is an element, specify a non-zero station
             lc: Loadcase containing results
             t: Reference time for results. For linear analyses, use "1".
             station (optional): Optional, default 0. Use: 1 fo I, 2 for 1/4, 3 for M, 4 for 3/4, 5 for J. For elements other than lines, use 1
@@ -3213,7 +3249,7 @@ class NextFEMrest:
         Returns:
             Array of doubles
         '''
-        return json.loads(self.nfrest('GET', '/node/ID'+qt(ID)+'', None, None))
+        return json.loads(self.nfrest('GET', '/node/'+qt(ID)+'', None, None))
     def getNodeInfo(self, node):
         ''' Get text with node properties
         
@@ -3233,7 +3269,7 @@ class NextFEMrest:
         Returns:
             A vert3 object
         '''
-        return self.nfrest('GET', '/node/ID'+qt(ID)+'', None, None)
+        return self.nfrest('GET', '/nodev/'+qt(ID)+'', None, None)
     def getNodeProperty(self, ID, name):
         ''' Return selected property of node
         
@@ -4624,7 +4660,7 @@ class NextFEMrest:
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('DELETE', '/node/ID'+qt(ID)+'', None, None))
+        return sbool(self.nfrest('DELETE', '/node/'+qt(ID)+'', None, None))
     def removeNodeCS(self, num):
         ''' Remove a previously defined Local Coordinate System from a node.
         
@@ -5380,7 +5416,7 @@ class NextFEMrest:
         Returns:
             Boolean value
         '''
-        return sbool(self.nfrest('POST', '/node/ID'+qt(ID)+'', coords, None))
+        return sbool(self.nfrest('POST', '/node'+qt(ID)+'', coords, None))
     def setNodeCS(self, num, x1, y1, z1, x2, y2, z2):
         ''' Set the Local Coordinate System of a node by specifying the first 2 vectors.
         
@@ -5406,7 +5442,7 @@ class NextFEMrest:
         Returns:
             Boolean value
         '''
-        return sbool(self.nfrest('POST', '/node/ID', node, None))
+        return sbool(self.nfrest('POST', '/nodev', node, None))
     def setPDeltaAnalysis(self, name, tol=0.0001):
         ''' Set a PDelta analysis from an existing loadcase, if it doesn't contain loads, use addLoadCaseToCombination to add the load contained in other loadcases.
         
