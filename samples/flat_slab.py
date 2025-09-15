@@ -1,38 +1,37 @@
+'''
+This example creates a flat slab model. The columns are simulated by pinned supports.
+'''
+
 from nextfempy import NextFEMrest
 
 # Connect to the running instance of NextFEM Designer
 nf = NextFEMrest()
 
-# Clear the model
+# Clear the current model and set units
 nf.newModel()
 nf.setUnits('m', 'kN')
 
 # Materials
-mat = nf.addIsoMaterial(
-	name = 'betao', 
-	E = 30e6, 
-	ni = 0.20, 
-	Wden = 25,
-    )
+mat = nf.addIsoMaterial(name='betao', E=30e6, ni=0.20, Wden=25)
 
 # Sections
 laje = nf.addPlanarSection(t=0.28)
 
 # Generate mesh elements
 nf.addMeshedWall(
-	ID = 1,
-	origX = 0.0,
-	origY = 0.0,
-	origZ = 0.0,
-	div1 = 54,
-	div2 = 54,
-	plan = 'XY',
-	leng = 27.0,
-	hei = 27.0,
+    ID = 1,
+    origX = 0.0,
+    origY = 0.0,
+    origZ = 0.0,
+    div1 = 54,
+    div2 = 54,
+    plan = 'XY',
+    leng = 27.0,
+    hei = 27.0,
     angle = 0,              # optional
-	tilt = '0',             # optional
-	nodeOffset = 0,         # optional
-	isHorizontal = False    # optional
+    tilt = '0',             # optional
+    nodeOffset = 0,         # optional
+    isHorizontal = False    # optional
     )
 
 # Assign material and section to elements
@@ -73,5 +72,5 @@ for ele in range(1, int(nf.elemsNumber)+1):
 # Analyse the model
 nf.RunModel()
 
-# Refresh the app
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)

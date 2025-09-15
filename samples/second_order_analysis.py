@@ -1,3 +1,7 @@
+'''
+This example illustrates how to perform a second order analysis, also called P-Delta analysis.
+'''
+
 from nextfempy import NextFEMrest
 
 # Connect to the running instance of NextFEM Designer
@@ -32,7 +36,7 @@ blkd = True; free = False
 nf.setBC('1', blkd, blkd, blkd, blkd, blkd, blkd)
 
 # Load case
-nf.addLoadCase('P+Q')
+nf.addLoadCase('PQ')
 
 P = 890
 Q = 4.45
@@ -41,7 +45,7 @@ nf.addNodalLoad(
     node = '2', 
     value = -P, 
     direction = 3, 
-    loadcase = 'P+Q', 
+    loadcase = 'PQ', 
     local = False
     )
 
@@ -49,15 +53,15 @@ nf.addNodalLoad(
     node = '2', 
     value = Q, 
     direction = 1, 
-    loadcase = 'P+Q', 
+    loadcase = 'PQ', 
     local = False
     )
 
 # Set second order analysis
-nf.setPDeltaAnalysis('P+Q')
+nf.setPDeltaAnalysis('PQ')
 
 # Run the model
 nf.RunModel()
 
-# Refresh the app
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)

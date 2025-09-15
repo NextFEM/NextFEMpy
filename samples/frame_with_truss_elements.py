@@ -1,3 +1,7 @@
+'''
+This example illustrates a plane frame with beam and truss elements.
+'''
+
 from nextfempy import NextFEMrest
 
 # Connect to the running instance of NextFEM Designer
@@ -8,12 +12,7 @@ nf.newModel()
 nf.setUnits('m', 'kN')
 
 # Materials
-mat = nf.addIsoMaterial(
-	name = 'betao', 
-	E = 30e6, 
-	ni = 0.20, 
-	Wden = 25,
-    )
+mat = nf.addIsoMaterial(name='betao', E=30e6, ni=0.20, Wden=25)
 
 # Sections
 sec1 = nf.addRectSection(1.00, 0.40)
@@ -39,10 +38,6 @@ nf.setBC(n5, free, blkd, free, blkd, blkd, blkd)
 nf.setBC(n6, free, blkd, free, blkd, blkd, blkd)
 nf.setBC(n7, free, blkd, free, blkd, blkd, blkd)
 
-# Common constraints for plane structures
-# nf.setBC(n2, free, blkd, free, blkd, free, blkd)
-# nf.setBC(n3, free, blkd, free, blkd, free, blkd)
-
 # Elements
 e1 = nf.addBeam(n1, n2, sec1, mat)
 e2 = nf.addBeam(n2, n3, sec1, mat)
@@ -64,7 +59,7 @@ for lc in ['p']:
 # 'p'
 for ele in [e1, e2, e3]:
     ln = float(nf.getElementProperty(ele,'lun'))
-    nf.addBeamLoad(
+    nf.addBeamLoadA(
         elem = ele,
         values = [-10, -10],
         positions = [0.0, ln],
@@ -76,5 +71,5 @@ for ele in [e1, e2, e3]:
 # Analyse the model
 nf.RunModel()
 
-# Refresh the app
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)

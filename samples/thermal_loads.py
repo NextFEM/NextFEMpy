@@ -1,6 +1,6 @@
 '''
 Example of a continuous 3 equal span beam, subject to a thermal gradient in the
-local y direction
+local y direction.
 '''
 
 from nextfempy import NextFEMrest
@@ -64,14 +64,14 @@ M_nf = nf.getBeamForce(num=e2, loadcase='vdt', time='1', type=6, station=3)
 
 print('\n---------------------------------------------------')
 print('Moment in the 2nd span due to the thermal gradient:')
-print(f'Solution by NextFEM:  M = {M_nf:.3f} kNm')
+print(f'- Solution by NextFEM:  M = {M_nf:.3f} kNm')
 
 # Theoretical solution
 M_theor = (6/5)*alphaT*(DeltaT/h)*(E*I)
 
-print(f'Theoretical solution: M = {M_theor:.3f} kNm')
+print(f'- Theoretical solution: M = {M_theor:.3f} kNm')
 print('---------------------------------------------------')
 print('')
 
-# Refresh NextFEM Designer GUI
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)

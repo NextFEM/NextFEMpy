@@ -40,7 +40,7 @@ class vert3:
             "Y": self.Y,
             "Z": self.Z
         }
-    
+
 class NextFEMrest:
     headers = {}
 
@@ -2069,6 +2069,17 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/section/exportdxf/'+str(sID)+'', None, dict([("path",path)])))
+    def exportSpreadsheet(self, filename, table:list):
+        ''' Export results in spreadsheet format (csv or xlsx)
+        
+        Args:
+            filename: Path of the file to save
+            table: List of array of strings, containing each row of the table
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/op/export/table', table, dict([("path",filename)])))
     def exportWexBIM(self, path, saveIFC=False, copyViewer=True):
         ''' Export the model to WexBIM format for web sharing.
         
@@ -2684,16 +2695,17 @@ class NextFEMrest:
             Array of bytes
         '''
         return json.loads(self.nfrest('GET', '/op/sectioncalc/fireimage/'+str(elemID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None))
-    def getFirstMode(self, ct=0.05):
-        ''' Get from results or estimate the first period of the structure. If no results are available, relationship as per EC8 4.6 is used.
+    def getFirstMode(self, ct=0.05, direction=0):
+        ''' Get from results or estimate the fundamental period of the structure. If no results are available, relationship as per EC8 4.6 is used.
         
         Args:
             ct (optional): Optional, default 0.05. Coefficient for estimation of fundamental period from EC8 4.6: T1=ct*H^(3/4)
+            direction (optional): Optional, default 0 (no specific direction). Direction of the seismic action to get proper period
 
         Returns:
             The first period of the model
         '''
-        return float(self.nfrest('GET', '/res/firstmode/'+str(ct)+'', None, None))
+        return float(self.nfrest('GET', '/res/firstmode/'+str(ct)+'/'+str(direction)+'', None, None))
     def getFloorLoadType(self, name):
         ''' Get a string describing the selected floor load type
         
@@ -4863,6 +4875,16 @@ class NextFEMrest:
             Array of bytes
         '''
         return json.loads(self.nfrest('GET', '/op/docx/bytes', readOnlyPassword, None))
+    def saveDocXtoHTML(self, pageTitle):
+        ''' Save the current DocX document to HTML format and return it as a string
+        
+        Args:
+            pageTitle: Title of the resulting HTML page
+
+        Returns:
+            HTML code as string
+        '''
+        return self.nfrest('GET', '/op/docx/html', pageTitle, None)
     def saveModel(self, filename):
         ''' Save the model and results with desired name
         

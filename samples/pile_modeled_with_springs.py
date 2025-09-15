@@ -1,17 +1,18 @@
 '''
-This example illustrates how to analyze a pile foundation. The soil
-will be modeled using spring elements.
+This example illustrates how to analyze a pile foundation. The soil is modeled using spring elements.
 
 The pile has free ends, and is subjected to a horizontal force and
 a moment, both applied at the top of it.
 
-The pile will be divided in 10 elements.
+The pile is divided in 10 elements.
 
-The spring stiffness will be calculated as the product between the
+The spring stiffness are calculated as the product between the
 soil modulus of elasticity and the element length.
 '''
 
-### Main data ###
+# ======================================================================
+# Main data
+# ======================================================================
 
 L  = 20.0   # pile lenght, m
 d  = 1.5    # pile diameter, m
@@ -22,7 +23,9 @@ Ec = 31e6   # Concrete modulus of elasticity, kN/m**2
 F  = 100.0  # Horizontal force at the top, kN
 M  = 100.0  # Moment at the top, kNm
 
-### Build the model and analyze it ###
+# ======================================================================
+# Build the model and analyze it
+# ======================================================================
 
 from nextfempy import NextFEMrest
 

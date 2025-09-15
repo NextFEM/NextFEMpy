@@ -1,3 +1,10 @@
+'''
+This example generates a continuous beam from a list containing their spans,
+for example, spans = [4.0, 5.0, 4.0].
+
+The coordinates of nodes and incidence of elements are both automatically generated.
+'''
+
 from nextfempy import NextFEMrest
 
 # Connect to the running instance of NextFEM Designer
@@ -45,7 +52,7 @@ for lc in ['pp', 'sc1']:
 nf.setSelfWeight('pp')
         
 # sc1
-nf.addBeamLoad(
+nf.addBeamLoadA(
     elem = '1',
     values = [-10, -10],
     positions = [0.0, spans[0]],
@@ -57,12 +64,13 @@ nf.addBeamLoad(
 # Analyse the model
 nf.RunModel()
 
-# Save the model using the same name as Python script
+# Save the model using the same name as the Python script
 import os
 model_name = os.path.basename(__file__)
 model_name = model_name.replace('.py', '.nxf')
 dir = os.path.dirname(os.path.realpath(__file__)) # get current dir
 print(nf.saveModel(dir + '\\' + model_name))
 
-# Refresh the app
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)
+

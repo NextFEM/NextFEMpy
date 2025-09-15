@@ -1,3 +1,9 @@
+'''
+This is a very basic example:
+a simply supported beam with a span of 5.0 m and a load of 10 kN/m.
+'''
+
+
 from nextfempy import NextFEMrest
 
 # Connect to the running instance of NextFEM Designer
@@ -8,19 +14,14 @@ nf.newModel()
 nf.setUnits('m', 'kN')
 
 # Materials
-mat = nf.addIsoMaterial(
-	name = 'betao', 
-	E = 30e6, 
-	ni = 0.20, 
-	Wden = 25,
-    )
+mat = nf.addIsoMaterial(name='betao', E=30e6, ni=0.20, Wden=25)
 
 # Sections
 sec = nf.addRectSection(0.30, 0.40)
 
 # Nodes
-n1 = nf.addNode( 0.0, 0, 0.0)
-n2 = nf.addNode( 5.0, 0, 0.0)
+n1 = nf.addNode( 0.0, 0.0, 0.0)
+n2 = nf.addNode( 5.0, 0.0, 0.0)
 
 # Boundary conditions
 blkd = True; free = False
@@ -46,5 +47,5 @@ nf.addBeamLoadU(
 # Analyse the model
 nf.RunModel()
 
-# Refresh the app
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)

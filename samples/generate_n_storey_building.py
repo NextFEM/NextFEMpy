@@ -6,6 +6,8 @@ The main data are lists of spans, for example:
 lx = [5.0, 5.0, 5.0]
 ly = [6.0, 6.0]
 lz = [4.0, 3.0]
+
+It also illustrates how to perform a modal analysis.
 '''
 
 from nextfempy import NextFEMrest
@@ -29,9 +31,9 @@ vigasy = nf.addRectSection(0.20, 0.50)
 lajes = nf.addPlanarSection(t=0.20)
 
 # Spans in both directions and floor heights
-lx = [5.0, 5.0, 5.0]
+lx = [5.0, 5.0, 5.0, 2.0, 2.0]
 ly = [6.0, 6.0]
-lz = [4.0, 3.0, 3.0, 3.0, 3.0]
+lz = [4.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
 
 # Number of bays along x, bays along y, and storeys
 nlx = len(lx)
@@ -95,30 +97,27 @@ for k in range(nlz):
         n = n + 1
         for i in range(nlx):
             n = n + 1
-            nf.addQuad(str(n), str(n+1), str(n + nlx + 2), str(n + nlx + 1),lajes,mat)
+            nf.addQuad(str(n), str(n+1), str(n + nlx + 2), str(n + nlx + 1))
 
 # Boundary conditions
 for n in range(1, (nlx+1)*(nly+1) + 1):
     nf.setBC(str(n), True, True, True, True, True, True)
 
 # Load cases
-nf.addLoadCase('pp')
-nf.addLoadCase('modal')
+for lc in ['pp', 'modal']:
+    nf.addLoadCase(lc)
 
-# pp
+# 'pp'
 nf.setSelfWeight('pp')
 
 # Get masses from lc 'pp'
 nf.setLoadsToMass('pp')
 
-# Assign rigid diaphragms
-nf.setRigidDiaphragms()
-
 # Perform modal analysis
-nf.setModalAnalysis('modal', 12)
+nf.setModalAnalysis('modal', 9)
 
 # Analyse the model
 nf.RunModel()
 
-# Refresh the app
+# Refresh NextFEM GUI
 nf.refreshDesignerView(0, resize=True)
