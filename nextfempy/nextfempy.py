@@ -1682,23 +1682,22 @@ class NextFEMrest:
             True if node satisfies checking, False otherwise
         '''
         return sbool(self.nfrest('GET', '/res/check/node/'+qt(node)+'/'+qt(lc)+'/'+qt(ts)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("logPath",logPath)])))
-    def checkNodes(self, nodes:list, lc, ts, stationType, verName, savelog=False, messages=False, defaultParams:list=None):
+    def checkNodes(self, nodes:list, lc, ts, verName, savelog=False, messages=False, defaultParams:list=None):
         ''' Check specified nodes in a model against results.
         
         Args:
             nodes: ID of the nodes to be checked
             lc: Loadcase containing results
             ts: Reference time for results. For linear analyses, use "1".
-            stationType: Name of the checking to be used. E.g. "Steel EC3" or "EC2_Concrete". NVV files have underscore.
-            verName: Optionally, log file is written
-            savelog (optional): Optionally, messages from checking engine are shown
-            messages (optional): Optional. Parameters for checking
-            defaultParams (optional)
+            verName: Name of the checking to be used. E.g. "Steel EC3" or "EC2_Concrete". NVV files have underscore.
+            savelog (optional): Optionally, log file is written
+            messages (optional): Optionally, messages from checking engine are shown
+            defaultParams (optional): Optional. Parameters for checking
 
         Returns:
             True if nodes satisfy checking, False otherwise
         '''
-        return sbool(self.nfrest('GET', '/res/check/nodes/'+qt(lc)+'/'+qt(ts)+'/'+str(stationType)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("nodes",json.dumps(nodes))])))
+        return sbool(self.nfrest('GET', '/res/check/nodes/'+qt(lc)+'/'+qt(ts)+'/'+qt(verName)+'/'+str(savelog)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("nodes",json.dumps(nodes))])))
     def checkOverlappedElements(self):
         ''' Check overlapped elements in the model
         
@@ -2326,6 +2325,19 @@ class NextFEMrest:
             Array of strings
         '''
         return json.loads(self.nfrest('GET', '/res/check/sets', None, None))
+    def getCheckLogName(self, ID, lc, t, station=''):
+        ''' Get the log entry name for a specific node/element check.
+        
+        Args:
+            ID: ID of the node/element that has been checked
+            lc: Loadcase containing results
+            t: Reference time for results. For linear analyses, use "1".
+            station (optional): 1 for I, 2 for ¼, 3 for M, 4 for ¾, 5 for J. Parameter is passed as string in order to account special cases. Empty (or 6) for node checking
+
+        Returns:
+            The log entry name that should be in program cache if the node/element has already been checked
+        '''
+        return self.nfrest('GET', '/res/check/logname/'+qt(ID)+'/'+qt(lc)+'/'+qt(t)+'/'+qt(station)+'', None, None)
     def getCheckNameByMaterial(self, ID):
         ''' Get checking-set name from the built-in list
         
@@ -2815,6 +2827,16 @@ class NextFEMrest:
             An array with names of groups
         '''
         return json.loads(self.nfrest('GET', '/groups', None, None))
+    def getHTMLlogCheck(self, logName):
+        ''' Get the HTML log of the last checking run. Use getCheckLogName to get the name of a specific check.
+        
+        Args:
+            logName: Name of the log to retrieve
+
+        Returns:
+            The HTML log as a string
+        '''
+        return self.nfrest('GET', '/res/check/htmllog', logName, None)
     def getItemDataResults(self, item, lc, t, station=0):
         ''' Get properties and results for the selected node or element
         
@@ -4310,7 +4332,7 @@ class NextFEMrest:
             maxTriaArea: Maximum area for each triangular element
             useAllNodes (optional): Optional. Include internal nodes in mesh - only for convex regions
             belt (optional): Optional. Size of the optional belt, external to the convex polygon
-            useQuad (optional): Optional. Use Quad where possible
+            useQuad (optional): Optional. Use Quad where possible. Not recommended, as can generate degenerated quad elements
             minAngle (optional): Optional. Mininum angle in degrees for triangles generation, default is 20°
 
         Returns:
@@ -4326,7 +4348,7 @@ class NextFEMrest:
             maxTriaArea: Maximum area for each triangular element
             useAllNodes (optional): Optional. Include internal nodes in mesh - only for convex regions
             belt (optional): Optional. Size of the optional belt, external to the convex polygon
-            useQuad (optional): Optional. Use Quad where possible
+            useQuad (optional): Optional. Use Quad where possible. Not recommended, as can generate degenerated quad elements
             minAngle (optional): Optional. Mininum angle in degrees for triangles generation, default is 20°
 
         Returns:
