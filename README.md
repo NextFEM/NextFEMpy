@@ -7,9 +7,13 @@ If you're looking for NextFEMpy source, look into /nextfempy folder.
 If you're looking for sample code using nextfempy, look into /samples folder.
 
 ## Installation instructions
-
 ```
 pip install nextfempy
+```
+
+## Upgrading instructions
+```
+pip install nextfempy --upgrade
 ```
 
 ## Usage
