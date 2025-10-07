@@ -1822,7 +1822,7 @@ class NextFEMrest:
         ''' Create a DocX file with the desired text
         
         Args:
-            path: Path of the DocX document
+            path: Path of the DocX document, consistent with the system conventions, on existing folders
             text: Text to be written in the document
             template (optional): Optional. Path of a DocX template to be used in document generation
 
@@ -2988,7 +2988,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/loadcase/combos/'+str(includeEnvelopes)+'', None, None))
+        return json.loads(self.nfrest('GET', '/loadcases/combos/'+str(includeEnvelopes)+'', None, None))
     def getLoadDurationClass(self, loadcase):
         ''' Returns the load duration class for the requested loadcase
         
@@ -4880,7 +4880,7 @@ class NextFEMrest:
         '''
         return self.nfrest('GET', '/op/run/'+str(outOfProc)+'/'+str(noWindow)+'', None, None)
     def saveDocX(self):
-        ''' Save the current DocX document to a file. After saving, the document cannot be modified.
+        ''' Save the current DocX document to a file. After saving, the document cannot be modified, nor saved again.
         
         
         Returns:
@@ -4888,7 +4888,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/op/docx/save', None, None))
     def saveDocXbytes(self, readOnlyPassword=''):
-        ''' Save the current DocX document to an array of bytes. After saving, the document cannot be modified.
+        ''' Save the current DocX document to an array of bytes. After saving, the document cannot be modified, nor saved again.
         
         Args:
             readOnlyPassword (optional): Set a read-only password for the document. If the password start with 'u_', unlocking is not possible
@@ -4898,7 +4898,7 @@ class NextFEMrest:
         '''
         return json.loads(self.nfrest('GET', '/op/docx/bytes', readOnlyPassword, None))
     def saveDocXtoHTML(self, pageTitle):
-        ''' Save the current DocX document to HTML format and return it as a string
+        ''' Save the current DocX document to HTML format and return it as a string. After saving, the document cannot be modified, nor saved again.
         
         Args:
             pageTitle: Title of the resulting HTML page
