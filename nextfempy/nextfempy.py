@@ -1829,7 +1829,7 @@ class NextFEMrest:
         Returns:
             Always true
         '''
-        return sbool(self.nfrest('GET', '/op/docx/create'+json.dumps(text)+'', None, dict([("path",path),("template",template)])))
+        return sbool(self.nfrest('GET', '/op/docx/create', text, dict([("path",path),("template",template)])))
     def customCheck(self, formulae:list):
         ''' Run checking on user formulae. No node or element quantities are given. See also getItemDataResults method.
         
@@ -2078,7 +2078,7 @@ class NextFEMrest:
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/op/export/table', table, dict([("path",filename)])))
+        return sbool(self.nfrest('POST', '/op/export/table', table, dict([("path",filename)])))
     def exportWexBIM(self, path, saveIFC=False, copyViewer=True):
         ''' Export the model to WexBIM format for web sharing.
         
