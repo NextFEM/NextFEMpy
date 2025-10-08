@@ -1784,7 +1784,7 @@ class NextFEMrest:
         Returns:
             True
         '''
-        return sbool(self.nfrest('GET', '/op/docx/compile/'+str(twoPasses)+'', tableDict, dict([("dict",json.dumps(dict))])))
+        return sbool(self.nfrest('POST', '/op/docx/compile/'+str(twoPasses)+'', tableDict, dict([("dict",json.dumps(dict))])))
     def convertToMeshedSection(self, sectionID):
         ''' Convert an existing section to a new tria-meshed section. Remember to re-assign the new section to elements with assignSectionToElement
         
@@ -1829,7 +1829,7 @@ class NextFEMrest:
         Returns:
             Always true
         '''
-        return sbool(self.nfrest('GET', '/op/docx/create', text, dict([("path",path),("template",template)])))
+        return sbool(self.nfrest('POST', '/op/docx/create', text, dict([("path",path),("template",template)])))
     def customCheck(self, formulae:list):
         ''' Run checking on user formulae. No node or element quantities are given. See also getItemDataResults method.
         
@@ -1875,7 +1875,7 @@ class NextFEMrest:
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/op/docx/delheadings', headingsIDtoDelete, None))
+        return sbool(self.nfrest('POST', '/op/docx/delheadings', headingsIDtoDelete, None))
     def deleteGroup(self, name):
         ''' Remove the specified group from model
         
@@ -2294,7 +2294,7 @@ class NextFEMrest:
         Returns:
             A table as a list of string arrays.
         '''
-        return json.loads(self.nfrest('GET', '/res/beamforcesenvtable/'+qt(num)+'/'+str(stationsMode)+'', loadcases, None))
+        return json.loads(self.nfrest('POST', '/res/beamforcesenvtable/'+qt(num)+'/'+str(stationsMode)+'', loadcases, None))
     def getBeamResMoments(self, elemID):
         ''' Get the beam resisting moments for each direction of a beam
         
@@ -2836,7 +2836,7 @@ class NextFEMrest:
         Returns:
             The HTML log as a string
         '''
-        return self.nfrest('GET', '/res/check/htmllog', logName, None)
+        return self.nfrest('POST', '/res/check/htmllog', logName, None)
     def getItemDataResults(self, item, lc, t, station=0):
         ''' Get properties and results for the selected node or element
         
@@ -3209,7 +3209,7 @@ class NextFEMrest:
         Returns:
             List of arrays of bytes
         '''
-        return json.loads(self.nfrest('GET', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)])))
+        return json.loads(self.nfrest('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)])))
     def getNodalDisp(self, num, loadcase, time, direction):
         ''' Get nodal displacement from the selected loadcase and time
         
@@ -3672,7 +3672,7 @@ class NextFEMrest:
         Returns:
             A dictionary of {string, double} containing all the results from calculation
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/shear2/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', overrideValues, None))
+        return json.loads(self.nfrest('POST', '/op/sectioncalc/shear2/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', overrideValues, None))
     def getSectionsLibrary(self, filter=''):
         ''' Return an array of string containing section names from built-in library.
         
@@ -3728,7 +3728,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/shearres', dict, None))
+        return json.loads(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
     def getShearResFromDict(self, dict:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
@@ -3738,7 +3738,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/shearres', dict, None))
+        return json.loads(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
     def getShellEndRelease(self, ID):
         ''' Give shell releases
         
@@ -4896,7 +4896,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/op/docx/bytes', readOnlyPassword, None))
+        return json.loads(self.nfrest('POST', '/op/docx/bytes', readOnlyPassword, None))
     def saveDocXtoHTML(self, pageTitle):
         ''' Save the current DocX document to HTML format and return it as a string. After saving, the document cannot be modified, nor saved again.
         
@@ -4906,7 +4906,7 @@ class NextFEMrest:
         Returns:
             HTML code as string
         '''
-        return self.nfrest('GET', '/op/docx/html', pageTitle, None)
+        return self.nfrest('POST', '/op/docx/html', pageTitle, None)
     def saveModel(self, filename):
         ''' Save the model and results with desired name
         
