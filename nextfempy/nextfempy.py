@@ -14,6 +14,12 @@ def qt(s):
         return str(urllib.parse.quote(s, safe=''))
     except:
         return str(s)
+    
+def des(s):
+    try:
+        return json.loads(s)
+    except:
+        return str(s)
 
 class vert3:
     def __init__(self, *args, _num="0"):
@@ -146,7 +152,7 @@ class NextFEMrest:
             return f"Error in sending file: {str(e)}"
         finally:
             files['file'][1].close()
-    # get file list from server fo current user
+    # get file list from server for current user
     def userFiles(self)->list:
         ''' Get file list from server for current user
         
@@ -154,7 +160,7 @@ class NextFEMrest:
             List of files
         '''
         try:
-            return json.loads(self.nfrest('GET', '/op/userfiles', None, None))
+            return des(self.nfrest('GET', '/op/userfiles', None, None))
         except Exception as e:
             return ["User not logged-in"]
 
@@ -166,7 +172,7 @@ class NextFEMrest:
         Returns:
             Array of Int32
         '''
-        return json.loads(self.nfrest('GET', '/element/rebar/barsdiam', None, None))
+        return des(self.nfrest('GET', '/element/rebar/barsdiam', None, None))
     def activeHoopsDiameters(self):
         ''' Get a list of active bar diameters for hoops/stirrups
         
@@ -174,7 +180,7 @@ class NextFEMrest:
         Returns:
             Array of Int32
         '''
-        return json.loads(self.nfrest('GET', '/element/rebar/hoopsdiam', None, None))
+        return des(self.nfrest('GET', '/element/rebar/hoopsdiam', None, None))
     def addBeam(self, n1, n2, sect=0, mat=0, sect2=0):
         ''' Add a new beam to the model. Existing results will be deleted.
         
@@ -624,7 +630,7 @@ class NextFEMrest:
         Returns:
             A list of nodes for the wall
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/addmeshedwall/'+str(ID)+'/'+str(origX)+'/'+str(origY)+'/'+str(origZ)+'/'+str(div1)+'/'+str(div2)+'/'+qt(plan)+'/'+str(leng)+'/'+str(hei)+'/'+str(angle)+'/'+qt(tilt)+'/'+str(nodeOffset)+'/'+str(isHorizontal)+'', None, None))
+        return des(self.nfrest('GET', '/op/mesh/addmeshedwall/'+str(ID)+'/'+str(origX)+'/'+str(origY)+'/'+str(origZ)+'/'+str(div1)+'/'+str(div2)+'/'+qt(plan)+'/'+str(leng)+'/'+str(hei)+'/'+str(angle)+'/'+qt(tilt)+'/'+str(nodeOffset)+'/'+str(isHorizontal)+'', None, None))
     def addNodalDisp(self, node, disp, direction, loadcase):
         ''' Add an imposed displacement to the selected node
         
@@ -1093,7 +1099,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return json.loads(self.nfrest('POST', '/element/add/springsonnodes/'+qt(propName)+'', n, None))
+        return des(self.nfrest('POST', '/element/add/springsonnodes/'+qt(propName)+'', n, None))
     def addSpringWithID(self, n1, n2, ID, propName):
         ''' Add a new 2-node spring to the model with the desired ID. Existing results will be deleted.
         
@@ -1300,7 +1306,7 @@ class NextFEMrest:
         Returns:
             The path of the newly created model or, if checking is required, an array containing "Element-Station", "N", "Vy", "Vz", "Myy", "Mzz", "Ratio-NMM", "Ratio-V", path
         '''
-        return json.loads(self.nfrest('GET', '/res/check/analyzefire/'+qt(elem)+'/'+str(endTime)+'/'+str(beamExposure)+'/'+str(columnExposure)+'/'+qt(checkCombo)+'/'+str(selectForcesCrit)+'/'+str(fireCurve)+'/'+str(outOfProc)+'/'+str(noWindow)+'/'+str(customFireCurve)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/analyzefire/'+qt(elem)+'/'+str(endTime)+'/'+str(beamExposure)+'/'+str(columnExposure)+'/'+qt(checkCombo)+'/'+str(selectForcesCrit)+'/'+str(fireCurve)+'/'+str(outOfProc)+'/'+str(noWindow)+'/'+str(customFireCurve)+'', None, None))
     def appendDocXformula(self, formula, alignment=0):
         ''' Append and render a formula in Ascii syntax to an already opened DocX document. By default, this is aligned to center.
         
@@ -1352,7 +1358,7 @@ class NextFEMrest:
         Returns:
             Array of double
         '''
-        return json.loads(self.nfrest('POST', '/op/bwfilter/'+str(samplingF)+'/'+str(cutF)+'/'+str(order)+'/'+str(lowPass)+'', values, None))
+        return des(self.nfrest('POST', '/op/bwfilter/'+str(samplingF)+'/'+str(cutF)+'/'+str(order)+'/'+str(lowPass)+'', values, None))
     def applyEC8lateralForces(self, thID, loadCaseX, loadCaseY, propMasses=False, T1=0, ct=0.05, lam=1):
         ''' Apply lateral forces to the master nodes of the model. Rigid diaphragms and masses are required.
         
@@ -1378,7 +1384,7 @@ class NextFEMrest:
         Returns:
             Array of integers of the size of the rebars, with: 0 if rebar is outside figure, 1 if it's on a polygon vertex, 2 on border, 3 internal
         '''
-        return json.loads(self.nfrest('GET', '/section/rebar/inside/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/section/rebar/inside/'+qt(ID)+'', None, None))
     def assignHinge(self, beamID, hingeName):
         ''' Assign a plastic hinge to a beam
         
@@ -1632,7 +1638,7 @@ class NextFEMrest:
         Returns:
             A dictionary of string and decimal containing all the values used for checking and results
         '''
-        return json.loads(self.nfrest('GET', '/res/check/station/'+qt(elem)+'/'+qt(lc)+'/'+qt(t)+'/'+str(stationAbsissa)+'/'+qt(verName)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("logPath",logPath)])))
+        return des(self.nfrest('GET', '/res/check/station/'+qt(elem)+'/'+qt(lc)+'/'+qt(t)+'/'+str(stationAbsissa)+'/'+qt(verName)+'/'+str(messages)+'', None, dict([("defaultParams",json.dumps(defaultParams)),("logPath",logPath)])))
     def checkFreeNodes(self):
         ''' Check free nodes in the model
         
@@ -1640,7 +1646,7 @@ class NextFEMrest:
         Returns:
             An array of the detected free nodes.
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/findfreenodes', None, None))
+        return des(self.nfrest('GET', '/op/mesh/findfreenodes', None, None))
     def checkLineElements(self):
         ''' Check line elements and mesh if necessary.
         
@@ -1705,7 +1711,7 @@ class NextFEMrest:
         Returns:
             A list of overlapped elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/findoverlappedelements', None, None))
+        return des(self.nfrest('GET', '/op/mesh/findoverlappedelements', None, None))
     def clearElementCustomProperties(self, elem):
         ''' Clear element custom properties
         
@@ -1839,7 +1845,7 @@ class NextFEMrest:
         Returns:
             A dictionary of string and decimal containing all the checking results
         '''
-        return json.loads(self.nfrest('POST', '/res/check/item', formulae, None))
+        return des(self.nfrest('POST', '/res/check/item', formulae, None))
     def CustomLicense(self, lic):
         ''' Check if a license key is available
         
@@ -1906,7 +1912,7 @@ class NextFEMrest:
         Returns:
             An array containing the IDs of newly created Hexa elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/dividehexa/'+qt(hexaID)+'/'+str(divX)+'/'+str(divY)+'/'+str(divZ)+'', None, None))
+        return des(self.nfrest('GET', '/op/mesh/dividehexa/'+qt(hexaID)+'/'+str(divX)+'/'+str(divY)+'/'+str(divZ)+'', None, None))
     def divideLine(self, lines:list, fractions:list):
         ''' Divide existing Line elements
         
@@ -1917,7 +1923,7 @@ class NextFEMrest:
         Returns:
             An array containing the IDs of newly created Line elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/divideline', None, dict([("lines",json.dumps(lines)),("fractions",json.dumps(fractions))])))
+        return des(self.nfrest('GET', '/op/mesh/divideline', None, dict([("lines",json.dumps(lines)),("fractions",json.dumps(fractions))])))
     def divideLineByNodes(self, line, nodes:list):
         ''' Divide existing Line elements by nodes
         
@@ -1940,7 +1946,7 @@ class NextFEMrest:
         Returns:
             An array containing the IDs of newly created Quad elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/dividequad/'+qt(quadID)+'/'+str(divX)+'/'+str(divY)+'', None, None))
+        return des(self.nfrest('GET', '/op/mesh/dividequad/'+qt(quadID)+'/'+str(divX)+'/'+str(divY)+'', None, None))
     def divideWedge(self, wedgeID, div):
         ''' Divide an existing Wedge element along its extrusion direction
         
@@ -1951,7 +1957,7 @@ class NextFEMrest:
         Returns:
             An array containing the IDs of newly created Wedge elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/dividewedge/'+qt(wedgeID)+'/'+str(div)+'', None, None))
+        return des(self.nfrest('GET', '/op/mesh/dividewedge/'+qt(wedgeID)+'/'+str(div)+'', None, None))
     def duplicateSection(self, originalID):
         ''' Duplicate the selected section
         
@@ -1962,6 +1968,17 @@ class NextFEMrest:
             The ID of the newly created copy of the section
         '''
         return int(self.nfrest('GET', '/section/duplicate/'+str(originalID)+'', None, None))
+    def exportDXF(self, path, extruded):
+        ''' Export DXF of the model
+        
+        Args:
+            path: Path of the file to be saved
+            extruded: True if extruded model, false for wireframe
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('GET', '/op/export/dxf/'+str(extruded)+'', None, dict([("path",path)])))
     def exportGLTF(self, path, saveIFC=False):
         ''' Export the model to glTF format for web sharing.
         
@@ -2164,7 +2181,7 @@ class NextFEMrest:
         Returns:
             A list of nodal IDs
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/alignednodes/'+str(tol)+'', None, dict([("n1",n1),("n2",n2)])))
+        return des(self.nfrest('GET', '/op/mesh/alignednodes/'+str(tol)+'', None, dict([("n1",n1),("n2",n2)])))
     def getAreaByNodes(self, nodes:list):
         ''' Get area from the selected nodes
         
@@ -2184,7 +2201,7 @@ class NextFEMrest:
         Returns:
             Boolean array containing True if DOF is restrained
         '''
-        return json.loads(self.nfrest('GET', '/bc/get/'+qt(node)+'', None, None))
+        return des(self.nfrest('GET', '/bc/get/'+qt(node)+'', None, None))
     def getBeamDeflection(self, num, loadcase, time, type, station):
         ''' Get beam deflection for the selected element, loadcase, time and station
         
@@ -2254,7 +2271,7 @@ class NextFEMrest:
         Returns:
             A vector of size 6. Null vector if something went wrong
         '''
-        return json.loads(self.nfrest('GET', '/res/beamforces/'+qt(num)+'/'+qt(loadcase)+'/'+str(station)+'/'+qt(time)+'', None, None))
+        return des(self.nfrest('GET', '/res/beamforces/'+qt(num)+'/'+qt(loadcase)+'/'+str(station)+'/'+qt(time)+'', None, None))
     def getBeamForcesAtNode(self, elem, node, loadcase, time='1'):
         ''' Get all the forces for the selected element at the specified node (beam end), loadcase, time and station
         
@@ -2267,7 +2284,7 @@ class NextFEMrest:
         Returns:
             A vector of size 6. Null vector if something went wrong
         '''
-        return json.loads(self.nfrest('GET', '/res/beamforcesatnode/'+qt(elem)+'/'+qt(node)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
+        return des(self.nfrest('GET', '/res/beamforcesatnode/'+qt(elem)+'/'+qt(node)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
     def getBeamForcesDiagram(self, num, loadcase, type, offsetL=0, numStations=21, time='1'):
         ''' Get the beam diagrams values for the selected number of stations along beam
         
@@ -2294,7 +2311,7 @@ class NextFEMrest:
         Returns:
             A table as a list of string arrays.
         '''
-        return json.loads(self.nfrest('POST', '/res/beamforcesenvtable/'+qt(num)+'/'+str(stationsMode)+'', loadcases, None))
+        return des(self.nfrest('POST', '/res/beamforcesenvtable/'+qt(num)+'/'+str(stationsMode)+'', loadcases, None))
     def getBeamResMoments(self, elemID):
         ''' Get the beam resisting moments for each direction of a beam
         
@@ -2304,7 +2321,7 @@ class NextFEMrest:
         Returns:
             An array containing a list of {abscissa,Mrzmax,Mrzmin,Mrymax,Mrymin}
         '''
-        return json.loads(self.nfrest('GET', '/res/check/beammoments/'+qt(elemID)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/beammoments/'+qt(elemID)+'', None, None))
     def getBeamResShear(self, elemID, loadcase='', time='1'):
         ''' Get the beam resisting shear for each direction of a beam.   WARNING: This is possible only against results of a given loadcase for the element, otherwise a set of zero forces are given and results would not be accurate
         
@@ -2316,7 +2333,7 @@ class NextFEMrest:
         Returns:
             An array containing a list of {abscissa,Vry,-Vry,Vrz,-Vrz}
         '''
-        return json.loads(self.nfrest('GET', '/res/check/beamshearres/'+qt(elemID)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/beamshearres/'+qt(elemID)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
     def getBuiltInChecking(self):
         ''' Get available checking scripts.
         
@@ -2324,7 +2341,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/res/check/sets', None, None))
+        return des(self.nfrest('GET', '/res/check/sets', None, None))
     def getCheckLogName(self, ID, lc, t, station=''):
         ''' Get the log entry name for a specific node/element check.
         
@@ -2379,7 +2396,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/loadcases/descombos/designtype/'+str(type)+'/'+str(servType)+'', None, None))
+        return des(self.nfrest('GET', '/loadcases/descombos/designtype/'+str(type)+'/'+str(servType)+'', None, None))
     def getConnectedElements(self, node, onlyOfType=-1):
         ''' Get all the elements connected to the specified node
         
@@ -2390,7 +2407,7 @@ class NextFEMrest:
         Returns:
             An array of element IDs
         '''
-        return json.loads(self.nfrest('GET', '/node/connectedelements/'+qt(node)+'/'+str(onlyOfType)+'', None, None))
+        return des(self.nfrest('GET', '/node/connectedelements/'+qt(node)+'/'+str(onlyOfType)+'', None, None))
     def getControlNode(self):
         ''' Return the ID of the higher central node.
         
@@ -2409,7 +2426,7 @@ class NextFEMrest:
         Returns:
             A list of corner nodes, max 4
         '''
-        return json.loads(self.nfrest('GET', '/op/corners', None, dict([("nodes",json.dumps(nodes)),("lcs",json.dumps(lcs))])))
+        return des(self.nfrest('GET', '/op/corners', None, dict([("nodes",json.dumps(nodes)),("lcs",json.dumps(lcs))])))
     def getCustomData(self, key):
         ''' Get custom data stored in the model.
         
@@ -2436,7 +2453,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/function/plotdata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
+        return des(self.nfrest('GET', '/function/plotdata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
     def getDefinedDesignMaterials(self):
         ''' Return a list of used design material IDs
         
@@ -2444,7 +2461,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/designmaterials', None, None))
+        return des(self.nfrest('GET', '/designmaterials', None, None))
     def getDefinedMaterials(self):
         ''' Return a list of used material IDs
         
@@ -2452,7 +2469,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/materials', None, None))
+        return des(self.nfrest('GET', '/materials', None, None))
     def getDefinedSections(self):
         ''' Return a list of used section IDs
         
@@ -2460,7 +2477,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/sections', None, None))
+        return des(self.nfrest('GET', '/sections', None, None))
     def getDesignMaterialProperty(self, ID, name, units=None):
         ''' Return selected property from a design material
         
@@ -2483,7 +2500,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/designmaterials/library/'+qt(filter)+'/'+str(type)+'', None, None))
+        return des(self.nfrest('GET', '/designmaterials/library/'+qt(filter)+'/'+str(type)+'', None, None))
     def getDesignMaterialsLibrary(self, filename, filter='', type=0):
         ''' Return an array of string containing design material names from built-in library.
         
@@ -2495,7 +2512,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
+        return des(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
     def getDocXheadings(self):
         ''' Get a list of headings contained in the current DocX document.
         
@@ -2503,7 +2520,7 @@ class NextFEMrest:
         Returns:
             List of array of strings as (ID, level, title)
         '''
-        return json.loads(self.nfrest('GET', '/op/docx/headings', None, None))
+        return des(self.nfrest('GET', '/op/docx/headings', None, None))
     def getDXFentities(self, stream):
         ''' Get drawing entities in the loaded DXF serialized in JSON format
         
@@ -2533,7 +2550,7 @@ class NextFEMrest:
         Returns:
             A double array
         '''
-        return json.loads(self.nfrest('GET', '/element/centroid/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/element/centroid/'+qt(ID)+'', None, None))
     def getElementChecks(self, ID, lc, time):
         ''' Get the checks stored in the model for the specified element
         
@@ -2555,7 +2572,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/element/conn/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/element/conn/'+qt(ID)+'', None, None))
     def getElementCustomProperty(self, elem, propName):
         ''' Get an already defined element custom property
         
@@ -2576,7 +2593,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/element/info/'+qt(element)+'', None, None))
+        return des(self.nfrest('GET', '/element/info/'+qt(element)+'', None, None))
     def getElementOffset(self, elem):
         ''' Get the element offset for selected beam element
         
@@ -2586,7 +2603,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with offset in z and offset in y local directions. Return null array even if the element is not found
         '''
-        return json.loads(self.nfrest('GET', '/element/beamoffset/'+qt(elem)+'', None, None))
+        return des(self.nfrest('GET', '/element/beamoffset/'+qt(elem)+'', None, None))
     def getElementProperty(self, ID, name):
         ''' Return selected property of element
         
@@ -2607,7 +2624,7 @@ class NextFEMrest:
         Returns:
             An array of double with {Linital, Lfinal} for each segment. The number of segment is the lenght of the array divided by 2
         '''
-        return json.loads(self.nfrest('GET', '/section/rebar/segments/'+qt(elem)+'', None, None))
+        return des(self.nfrest('GET', '/section/rebar/segments/'+qt(elem)+'', None, None))
     def getElementsChecks(self, lc, time):
         ''' Get the checks stored in the model for elements
         
@@ -2618,7 +2635,7 @@ class NextFEMrest:
         Returns:
             Null if no checking are available
         '''
-        return json.loads(self.nfrest('GET', '/res/check/elementsA/'+qt(lc)+'/'+qt(time)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/elementsA/'+qt(lc)+'/'+qt(time)+'', None, None))
     def getElementsChecksByMat(self, mat):
         ''' Get the checks stored in the model for the selected material type
         
@@ -2628,7 +2645,7 @@ class NextFEMrest:
         Returns:
             Null if no checking are available
         '''
-        return json.loads(self.nfrest('GET', '/res/check/elementsM/'+str(mat)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/elementsM/'+str(mat)+'', None, None))
     def getElementsFromGroup(self, name):
         ''' Get elements from group
         
@@ -2638,7 +2655,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return json.loads(self.nfrest('GET', '/group/elements/'+qt(name)+'', None, None))
+        return des(self.nfrest('GET', '/group/elements/'+qt(name)+'', None, None))
     def getElementType(self, ID):
         ''' Get element type: unk = 0,line = 1,tria = 2,quad = 3,hexa = 4,wedge = 5,tetra = 6,user = 10,line3 = 20,quad8 = 21,hexa16 = 22,hexa20 = 23,tetra10 = 24,tria6 = 25,wedge15 = 26,spring2nodes = 40
         
@@ -2668,7 +2685,7 @@ class NextFEMrest:
         Returns:
             Matrix of double of size [2,6], 6 for end I and 6 for end J. -1 means the DoF is not released
         '''
-        return json.loads(self.nfrest('GET', '/element/beamendrelease/'+qt(beamID)+'', None, None))
+        return des(self.nfrest('GET', '/element/beamendrelease/'+qt(beamID)+'', None, None))
     def getEnvelopeCombination(self, name):
         ''' Return a check object with loadcases and corresponding factors for desired envelope load combination.
         
@@ -2688,7 +2705,7 @@ class NextFEMrest:
         Returns:
             Array of vert3 instances
         '''
-        return json.loads(self.nfrest('GET', '/element/extrudedbeam/'+qt(elemID)+'', None, None))
+        return des(self.nfrest('GET', '/element/extrudedbeam/'+qt(elemID)+'', None, None))
     def getFireSectionImage(self, elemID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False):
         ''' Get section plot into an array of Bytes of Png image
         
@@ -2706,7 +2723,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/fireimage/'+str(elemID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/fireimage/'+str(elemID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None))
     def getFirstMode(self, ct=0.05, direction=0):
         ''' Get from results or estimate the fundamental period of the structure. If no results are available, relationship as per EC8 4.6 is used.
         
@@ -2735,7 +2752,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/load/floor/planesget', None, None))
+        return des(self.nfrest('GET', '/load/floor/planesget', None, None))
     def getForceUnit(self):
         ''' Get the unit for force in the model
         
@@ -2769,7 +2786,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/function/gendata/'+str(funcID)+'', None, None))
+        return des(self.nfrest('GET', '/function/gendata/'+str(funcID)+'', None, None))
     def getFunctionName(self, funcID):
         ''' Get name of the selected function
         
@@ -2798,7 +2815,7 @@ class NextFEMrest:
         Returns:
             Array of Int32
         '''
-        return json.loads(self.nfrest('GET', '/functions', None, None))
+        return des(self.nfrest('GET', '/functions', None, None))
     def getFunctionUnits(self, funcID):
         ''' Get units of the selected function (Y values)
         
@@ -2826,7 +2843,7 @@ class NextFEMrest:
         Returns:
             An array with names of groups
         '''
-        return json.loads(self.nfrest('GET', '/groups', None, None))
+        return des(self.nfrest('GET', '/groups', None, None))
     def getHTMLlogCheck(self, logName):
         ''' Get the HTML log of the last checking run. Use getCheckLogName to get the name of a specific check.
         
@@ -2849,7 +2866,7 @@ class NextFEMrest:
         Returns:
             A dictionary of string and decimal containing all the values used for checking and results
         '''
-        return json.loads(self.nfrest('GET', '/res/check/data/'+qt(item)+'/'+qt(lc)+'/'+qt(t)+'/'+str(station)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/data/'+qt(item)+'/'+qt(lc)+'/'+qt(t)+'/'+str(station)+'', None, None))
     def getLanguage(self):
         ''' Get language code (eg. "en" for English)
         
@@ -2865,7 +2882,7 @@ class NextFEMrest:
         Returns:
             A list of arrays of double (size 2)
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/bilmomentcurvature', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/bilmomentcurvature', None, None))
     def getLastMomentCurvatureData(self):
         ''' Get last moment-curvature extended data for the last section calculated in getSectMomentCurvature
         
@@ -2873,7 +2890,7 @@ class NextFEMrest:
         Returns:
             List of array of strings
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/momentcurvaturedata', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/momentcurvaturedata', None, None))
     def getLastRunLog(self):
         ''' Get log for the last run analysis
         
@@ -2881,7 +2898,7 @@ class NextFEMrest:
         Returns:
             An array of string, empty if not available
         '''
-        return json.loads(self.nfrest('GET', '/op/runlog', None, None))
+        return des(self.nfrest('GET', '/op/runlog', None, None))
     def getLastSectionRes3DDomainPoints(self, conn=None):
         ''' Get list of 3D points for plotting 3D resisting domain of the last computed section
         
@@ -2891,7 +2908,7 @@ class NextFEMrest:
         Returns:
             A list of vert3 containing 3D points of the domain boundary
         '''
-        return json.loads(self.nfrest('GET', '/res/check/plot3dsectiondomain'+str(conn)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/plot3dsectiondomain'+str(conn)+'', None, None))
     def getLastSectionResDomainPoints(self, domainType, cleanResponseTolerance=0):
         ''' Get list of points for plotting resisting domain of the last computed sections
         
@@ -2902,7 +2919,7 @@ class NextFEMrest:
         Returns:
             A list of array of double values, each of size 2 (X,Y)
         '''
-        return json.loads(self.nfrest('GET', '/res/check/lastplotsectiondomain/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/lastplotsectiondomain/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
     def getLenUnit(self):
         ''' Get the unit for length in the model
         
@@ -2940,7 +2957,7 @@ class NextFEMrest:
         Returns:
             Returns a description of the i-th load in the model. Empty string if not found
         '''
-        return json.loads(self.nfrest('GET', '/load/getA/'+str(i)+'', None, None))
+        return des(self.nfrest('GET', '/load/getA/'+str(i)+'', None, None))
     def getLoadcaseFactor(self, loadcase):
         ''' Get load factor for the function associated to the selected loadcase
         
@@ -2968,7 +2985,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/loadcases', None, None))
+        return des(self.nfrest('GET', '/loadcases', None, None))
     def getLoadCaseType(self, name):
         ''' Get loadcase type
         
@@ -2988,7 +3005,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/loadcases/combos/'+str(includeEnvelopes)+'', None, None))
+        return des(self.nfrest('GET', '/loadcases/combos/'+str(includeEnvelopes)+'', None, None))
     def getLoadDurationClass(self, loadcase):
         ''' Returns the load duration class for the requested loadcase
         
@@ -3016,7 +3033,7 @@ class NextFEMrest:
         Returns:
             Produces as list of load IDs for a single element.
         '''
-        return json.loads(self.nfrest('GET', '/load/element/get/'+qt(element)+'', None, None))
+        return des(self.nfrest('GET', '/load/element/get/'+qt(element)+'', None, None))
     def getLoadsForNode(self, node):
         ''' Produces a list of load IDs for a single node.
         
@@ -3026,7 +3043,7 @@ class NextFEMrest:
         Returns:
             Produces as list of load IDs for a single node.
         '''
-        return json.loads(self.nfrest('GET', '/load/node/get/'+qt(node)+'', None, None))
+        return des(self.nfrest('GET', '/load/node/get/'+qt(node)+'', None, None))
     def getLoadsInLoadcase(self, loadcase):
         ''' Produces a list of load IDs for a single loadcase.
         
@@ -3036,7 +3053,7 @@ class NextFEMrest:
         Returns:
             Array of Int32
         '''
-        return json.loads(self.nfrest('GET', '/load/inloadcase/'+qt(loadcase)+'', None, None))
+        return des(self.nfrest('GET', '/load/inloadcase/'+qt(loadcase)+'', None, None))
     def getLocalAxes(self, ID):
         ''' Return local axes of an element as API.vert3
         
@@ -3046,7 +3063,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return json.loads(self.nfrest('GET', '/element/lcs/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/element/lcs/'+qt(ID)+'', None, None))
     def getLocalAxesArray(self, ID):
         ''' Return local axes of an element as array of double {x1,x2,x3,y1,y2,y3,z1,z2,z3}
         
@@ -3056,7 +3073,7 @@ class NextFEMrest:
         Returns:
             Array of double
         '''
-        return json.loads(self.nfrest('GET', '/element/lcsA/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/element/lcsA/'+qt(ID)+'', None, None))
     def getMacroelement(self, elemID):
         ''' Get the macroelement type assigned to the selected element
         
@@ -3089,7 +3106,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/materials/library/'+qt(filter)+'/'+str(type)+'', None, None))
+        return des(self.nfrest('GET', '/materials/library/'+qt(filter)+'/'+str(type)+'', None, None))
     def getMaterialsLibrary(self, filename, filter='', type=0):
         ''' Return an array of string containing material names from built-in library.
         
@@ -3101,7 +3118,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/materials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
+        return des(self.nfrest('GET', '/materials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
     def getMaxMinBeamForces(self, sectionID, type):
         ''' Get maximum and minimum beam forces from elements having the same section, in all loadcases and all stations
         
@@ -3112,7 +3129,7 @@ class NextFEMrest:
         Returns:
             An array of length 2 containing max and min force for the desired type
         '''
-        return json.loads(self.nfrest('GET', '/res/maxminbeamforces/'+str(sectionID)+'/'+str(type)+'', None, None))
+        return des(self.nfrest('GET', '/res/maxminbeamforces/'+str(sectionID)+'/'+str(type)+'', None, None))
     def getMaxMinNodeDispl(self, dir, nodes:list=None):
         ''' Get maximum and minimum nodal displacement from all nodal results.
         
@@ -3123,7 +3140,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return json.loads(self.nfrest('POST', '/res/maxmindispl/'+str(dir)+'', nodes, None))
+        return des(self.nfrest('POST', '/res/maxmindispl/'+str(dir)+'', nodes, None))
     def getMaxMinWoodArmerMoments(self, elementID):
         ''' Get maximum and minimun Wood-Armer moments from elements in the same group of the selected element
         
@@ -3133,7 +3150,7 @@ class NextFEMrest:
         Returns:
             An array of length 2 containing max and min moments in this order: bottom dir.x, botton dir.y, top dir.x, top dir.y
         '''
-        return json.loads(self.nfrest('GET', '/res/maxminwoodarmer/'+str(elementID)+'', None, None))
+        return des(self.nfrest('GET', '/res/maxminwoodarmer/'+str(elementID)+'', None, None))
     def getMaxMinWoodArmerMoments(self, groupName):
         ''' Get maximum and minimun Wood-Armer moments from elements in the same group of the selected element
         
@@ -3143,7 +3160,7 @@ class NextFEMrest:
         Returns:
             An array of length 2 containing max and min moments in this order: bottom dir.x, botton dir.y, top dir.x, top dir.y
         '''
-        return json.loads(self.nfrest('GET', '/res/maxminwoodarmerg/'+qt(groupName)+'', None, None))
+        return des(self.nfrest('GET', '/res/maxminwoodarmerg/'+qt(groupName)+'', None, None))
     def getMemberElements(self, member):
         ''' Get the IDs of beam elements grouped in a member.
         
@@ -3153,7 +3170,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/model/member/elems/'+qt(member)+'', None, None))
+        return des(self.nfrest('GET', '/model/member/elems/'+qt(member)+'', None, None))
     def getMemberLength(self, member):
         ''' Get member length
         
@@ -3171,7 +3188,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/model/member/all', None, None))
+        return des(self.nfrest('GET', '/model/member/all', None, None))
     def getModalPeriod(self, num, loadcase):
         ''' Get a modal period of the structure or the buckling factor
         
@@ -3209,7 +3226,7 @@ class NextFEMrest:
         Returns:
             List of arrays of bytes
         '''
-        return json.loads(self.nfrest('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)])))
+        return des(self.nfrest('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)])))
     def getNodalDisp(self, num, loadcase, time, direction):
         ''' Get nodal displacement from the selected loadcase and time
         
@@ -3283,7 +3300,7 @@ class NextFEMrest:
         Returns:
             Array of doubles
         '''
-        return json.loads(self.nfrest('GET', '/node/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/node/'+qt(ID)+'', None, None))
     def getNodeInfo(self, node):
         ''' Get text with node properties
         
@@ -3293,7 +3310,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/node/info/'+qt(node)+'', None, None))
+        return des(self.nfrest('GET', '/node/info/'+qt(node)+'', None, None))
     def getNodePosition(self, ID):
         ''' Returns node position as vert3 object
         
@@ -3325,7 +3342,7 @@ class NextFEMrest:
         Returns:
             Null if no checking are available
         '''
-        return json.loads(self.nfrest('GET', '/res/check/nodesA/'+qt(lc)+'/'+qt(time)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/nodesA/'+qt(lc)+'/'+qt(time)+'', None, None))
     def getNodesFromCoords(self, dir, coord, tol=1E-06):
         ''' Get nodes having the specified coordinates
         
@@ -3337,7 +3354,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/nodesbycoords/'+str(dir)+'/'+str(coord)+'/'+str(tol)+'', None, None))
+        return des(self.nfrest('GET', '/op/mesh/nodesbycoords/'+str(dir)+'/'+str(coord)+'/'+str(tol)+'', None, None))
     def getNodesFromGroup(self, name):
         ''' Get nodes from group
         
@@ -3347,7 +3364,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return json.loads(self.nfrest('GET', '/group/nodes/'+qt(name)+'', None, None))
+        return des(self.nfrest('GET', '/group/nodes/'+qt(name)+'', None, None))
     def getNodesOnSides(self, nodes:list, tol=4.94065645841247E-324):
         ''' Get nodes on borders of the selected rectangular shell region
         
@@ -3358,7 +3375,7 @@ class NextFEMrest:
         Returns:
             Array of size 4 with bottom, right, top and left nodes
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/borders/'+str(tol)+'', None, dict([("nodes",json.dumps(nodes))])))
+        return des(self.nfrest('GET', '/op/mesh/borders/'+str(tol)+'', None, dict([("nodes",json.dumps(nodes))])))
     def getOSprocedureName(self):
         ''' Return the NextFEM procedure file for OpenSees, without .tcl extension
         
@@ -3377,7 +3394,7 @@ class NextFEMrest:
         Returns:
             Array of double
         '''
-        return json.loads(self.nfrest('GET', '/res/partmasses/'+str(mode)+'/'+qt(loadcase)+'', None, None))
+        return des(self.nfrest('GET', '/res/partmasses/'+str(mode)+'/'+qt(loadcase)+'', None, None))
     def getParticipationFactors(self, mode, loadcase):
         ''' Get participation factors from modal or response spectrum analysis
         
@@ -3388,7 +3405,7 @@ class NextFEMrest:
         Returns:
             Array of double
         '''
-        return json.loads(self.nfrest('GET', '/res/partfactors/'+str(mode)+'/'+qt(loadcase)+'', None, None))
+        return des(self.nfrest('GET', '/res/partfactors/'+str(mode)+'/'+qt(loadcase)+'', None, None))
     def getReinfPropertiesNTC(self, matID, secID, CF, betaAng, Hshear, Bshear, outInMPa=False):
         ''' Get design data for FRP/FRCM strips as per CNR DT 200 Italian code
         
@@ -3404,7 +3421,7 @@ class NextFEMrest:
         Returns:
             A dictionary of string, double values
         '''
-        return json.loads(self.nfrest('GET', '/material/frpdata/'+str(matID)+'/'+str(secID)+'/'+str(CF)+'/'+str(betaAng)+'/'+str(Hshear)+'/'+str(Bshear)+'/'+str(outInMPa)+'', None, None))
+        return des(self.nfrest('GET', '/material/frpdata/'+str(matID)+'/'+str(secID)+'/'+str(CF)+'/'+str(betaAng)+'/'+str(Hshear)+'/'+str(Bshear)+'/'+str(outInMPa)+'', None, None))
     def getResultHistory(self, loadcase, itemID, resultType, resultID1=0, resultID2=0):
         ''' Get result history for the selected quantity
         
@@ -3419,7 +3436,7 @@ class NextFEMrest:
         Returns:
             Array of double
         '''
-        return json.loads(self.nfrest('GET', '/res/hist/'+qt(loadcase)+'/'+qt(itemID)+'/'+str(resultType)+'/'+str(resultID1)+'/'+str(resultID2)+'', None, None))
+        return des(self.nfrest('GET', '/res/hist/'+qt(loadcase)+'/'+qt(itemID)+'/'+str(resultType)+'/'+str(resultID1)+'/'+str(resultID2)+'', None, None))
     def getRigidDiaphragms(self):
         ''' Gives the list of master nodes in rigid diaphragms
         
@@ -3427,7 +3444,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/rigiddiaph', None, None))
+        return des(self.nfrest('GET', '/op/mesh/rigiddiaph', None, None))
     def getRigidOffsets(self, beamID):
         ''' Get beam end offset length ratios, or and array of 0 if no end offset is present
         
@@ -3437,7 +3454,7 @@ class NextFEMrest:
         Returns:
             Return an array of size 2 with the relative length of the rigid offset for ends I and J, respectively
         '''
-        return json.loads(self.nfrest('GET', '/element/beamendoffset/'+qt(beamID)+'', None, None))
+        return des(self.nfrest('GET', '/element/beamendoffset/'+qt(beamID)+'', None, None))
     def getSectionColor(self, ID):
         ''' Get the color of the selected section in RGB format
         
@@ -3472,7 +3489,7 @@ class NextFEMrest:
         Returns:
             A 2-dimensional array of double
         '''
-        return json.loads(self.nfrest('GET', '/section/figure/'+str(sectionID)+'/'+str(figureID)+'/'+str(isHole)+'', None, None))
+        return des(self.nfrest('GET', '/section/figure/'+str(sectionID)+'/'+str(figureID)+'/'+str(isHole)+'', None, None))
     def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False, selectedBar=0):
         ''' Get section plot into an array of Bytes of Png image
         
@@ -3491,7 +3508,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None))
     def getSectionOffset(self, ID):
         ''' Get the section offset for selected beam element
         
@@ -3501,7 +3518,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with offset in z and offset in y local directions. Return null array even if the element is not found
         '''
-        return json.loads(self.nfrest('GET', '/section/set/offset/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/section/set/offset/'+qt(ID)+'', None, None))
     def getSectionProperties(self, ID):
         ''' Get all properties of a section
         
@@ -3511,7 +3528,7 @@ class NextFEMrest:
         Returns:
             A string array with all properties
         '''
-        return json.loads(self.nfrest('GET', '/section/props/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/section/props/'+qt(ID)+'', None, None))
     def getSectionProperty(self, ID, name):
         ''' Get selected property of a section
         
@@ -3532,7 +3549,7 @@ class NextFEMrest:
         Returns:
             Array of X,Y coordinates of size (rebarNumber,2). Coordinates are always referred to the center of reinforcement
         '''
-        return json.loads(self.nfrest('GET', '/section/rebar/coords/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/section/rebar/coords/'+qt(ID)+'', None, None))
     def getSectionRebarSize(self, ID):
         ''' Get rebar dimensions from selected section
         
@@ -3542,7 +3559,7 @@ class NextFEMrest:
         Returns:
             Array of dimensions of size (rebarNumber,2). All values in mm. Each item starts with Dd with d the diameter for bars, base x height @ rotation for rectangular reinforcements
         '''
-        return json.loads(self.nfrest('GET', '/section/rebar/size/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/section/rebar/size/'+qt(ID)+'', None, None))
     def getSectionResDomainPoints(self, domainIndex, domainType, cleanResponseTolerance=0):
         ''' Get list of points for plotting resisting domain of already computed sections
         
@@ -3554,7 +3571,7 @@ class NextFEMrest:
         Returns:
             A list of array of double values, each of size 2 (X,Y)
         '''
-        return json.loads(self.nfrest('GET', '/res/check/plotsectiondomain/'+str(domainIndex)+'/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
+        return des(self.nfrest('GET', '/res/check/plotsectiondomain/'+str(domainIndex)+'/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
     def getSectionResMoments(self, ID, station, calcType, N, Myy, Mzz):
         ''' Get flexural strength of a beam station by calculating neutral axis
         
@@ -3604,7 +3621,7 @@ class NextFEMrest:
         Returns:
             An array of strings containing calculation results
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/c/'+str(sectionID)+'/'+str(calcType)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(domainTp)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, dict([("saveImages",saveImages),("options",options)])))
+        return des(self.nfrest('GET', '/op/sectioncalc/c/'+str(sectionID)+'/'+str(calcType)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(domainTp)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, dict([("saveImages",saveImages),("options",options)])))
     def getSectionResMoments3(self, sectionID, calcType, N, Mzz, Myy, saveImages='', domainTp=0, options=None, Nserv=0, Mzzserv=0, Myyserv=0):
         ''' Get flexural strength of a section by calculating neutral axis. Material must be set as section property, see setSectionMaterial.
         
@@ -3639,7 +3656,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/shear/'+str(sectionID)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/shear/'+str(sectionID)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', None, None))
     def getSectionResShear(self, sectionID, verName, N=0, Mzz=0, Myy=0, Vy=0, Vz=0):
         ''' Get section shear resistance
         
@@ -3655,7 +3672,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/shear/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/shear/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', None, None))
     def getSectionResShearDict(self, sectionID, verName, N=0, Mzz=0, Myy=0, Vy=0, Vz=0, overrideValues:list=None):
         ''' Get section shear resistance
         
@@ -3672,7 +3689,7 @@ class NextFEMrest:
         Returns:
             A dictionary of {string, double} containing all the results from calculation
         '''
-        return json.loads(self.nfrest('POST', '/op/sectioncalc/shear2/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', overrideValues, None))
+        return des(self.nfrest('POST', '/op/sectioncalc/shear2/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', overrideValues, None))
     def getSectionsLibrary(self, filter=''):
         ''' Return an array of string containing section names from built-in library.
         
@@ -3682,7 +3699,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/sections/library/'+qt(filter)+'', None, None))
+        return des(self.nfrest('GET', '/sections/library/'+qt(filter)+'', None, None))
     def getSectionsLibrary(self, filename, filter=''):
         ''' Return an array of string containing section names from built-in library.
         
@@ -3693,7 +3710,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/sections/libraryf/'+qt(filename)+'/'+qt(filter)+'', None, None))
+        return des(self.nfrest('GET', '/sections/libraryf/'+qt(filename)+'/'+qt(filter)+'', None, None))
     def getSectMomentCurvature(self, sectionID, N, Mzz, Myy, npts=20, Nserv=0, Mzzserv=0, Myyserv=0):
         ''' Get moment-curvature diagram for the selected section
         
@@ -3710,7 +3727,7 @@ class NextFEMrest:
         Returns:
             A list of arrays of double (size 2) with resisting moment vs. curvature (1/units of length)
         '''
-        return json.loads(self.nfrest('GET', '/op/sectioncalc/momentcurvature/'+str(sectionID)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(npts)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, None))
+        return des(self.nfrest('GET', '/op/sectioncalc/momentcurvature/'+str(sectionID)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(npts)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, None))
     def getSeparator(self):
         ''' Returns separator used by the program
         
@@ -3728,7 +3745,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
-        return json.loads(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
+        return des(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
     def getShearResFromDict(self, dict:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
@@ -3738,7 +3755,7 @@ class NextFEMrest:
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
-        return json.loads(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
+        return des(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
     def getShellEndRelease(self, ID):
         ''' Give shell releases
         
@@ -3748,7 +3765,7 @@ class NextFEMrest:
         Returns:
             Matrix of boolean of size [n,6], where n is the number of nodes. 6 boolean values for each node (fx, fy, fz, mx, my, drilling)
         '''
-        return json.loads(self.nfrest('GET', '/element/shellendrelease/'+qt(ID)+'', None, None))
+        return des(self.nfrest('GET', '/element/shellendrelease/'+qt(ID)+'', None, None))
     def getSoilPressureAtNode(self, node, loadcase, time='1'):
         ''' Return the soil pressure (positive if compression on soil) in Z global direction
         
@@ -3770,7 +3787,7 @@ class NextFEMrest:
         Returns:
             Array of double of size 9, empty if error occurs
         '''
-        return json.loads(self.nfrest('GET', '/springproperty/axes/'+qt(elem)+'', None, None))
+        return des(self.nfrest('GET', '/springproperty/axes/'+qt(elem)+'', None, None))
     def getStaticLoadCases(self):
         ''' Get the names of static analysis loadcases set in the model.
         
@@ -3778,7 +3795,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/loadcases/static', None, None))
+        return des(self.nfrest('GET', '/loadcases/static', None, None))
     def getSubsoilElements(self):
         ''' Get a list of elements having subsoil springs
         
@@ -3786,7 +3803,7 @@ class NextFEMrest:
         Returns:
             An array of element IDs
         '''
-        return json.loads(self.nfrest('GET', '/element/add/subsoil', None, None))
+        return des(self.nfrest('GET', '/element/add/subsoil', None, None))
     def getTimePeriods(self, lc):
         ''' Returns time/period values in results for the desired loadcase
         
@@ -3796,7 +3813,7 @@ class NextFEMrest:
         Returns:
             Return nothing if empty results
         '''
-        return json.loads(self.nfrest('GET', '/res/periods/'+qt(lc)+'', None, None))
+        return des(self.nfrest('GET', '/res/periods/'+qt(lc)+'', None, None))
     def getUserViews(self):
         ''' Get a list of names of user-defined model views
         
@@ -3804,7 +3821,7 @@ class NextFEMrest:
         Returns:
             An array of strings
         '''
-        return json.loads(self.nfrest('GET', '/model/userviews', None, None))
+        return des(self.nfrest('GET', '/model/userviews', None, None))
     def getVersion(self):
         ''' Get API version
         
@@ -3820,7 +3837,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/element/walls/list', None, None))
+        return des(self.nfrest('GET', '/element/walls/list', None, None))
     def getWallHeight(self, grpName):
         ''' Gives the height of a specified wall
         
@@ -3838,7 +3855,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return json.loads(self.nfrest('GET', '/element/walls/elems', None, None))
+        return des(self.nfrest('GET', '/element/walls/elems', None, None))
     def getWallSection(self, grpName):
         ''' Gives the dimensions (thickness and width) of a specified wall
         
@@ -3848,7 +3865,7 @@ class NextFEMrest:
         Returns:
             Array of float with thickness and width
         '''
-        return json.loads(self.nfrest('GET', '/element/walls/section/'+qt(grpName)+'', None, None))
+        return des(self.nfrest('GET', '/element/walls/section/'+qt(grpName)+'', None, None))
     def hasResults(self, loadcase=''):
         ''' Flag indicating if model has results
         
@@ -4254,7 +4271,7 @@ class NextFEMrest:
         Returns:
             Array of string with custom properties names. Use getDesignMaterialProperty method to get values.
         '''
-        return json.loads(self.nfrest('GET', '/designmaterial/proplist/'+str(ID)+'', None, None))
+        return des(self.nfrest('GET', '/designmaterial/proplist/'+str(ID)+'', None, None))
     def listMaterialCustomProperty(self, ID):
         ''' Get a list of the custom properties stored in the selected material
         
@@ -4264,7 +4281,7 @@ class NextFEMrest:
         Returns:
             Array of string with custom properties names. Use getMaterialProperty method to get values.
         '''
-        return json.loads(self.nfrest('GET', '/material/proplist/'+str(ID)+'', None, None))
+        return des(self.nfrest('GET', '/material/proplist/'+str(ID)+'', None, None))
     def LoadCaseFromCombo(self, comboName):
         ''' Generates a load-case from a linear add combination.
         
@@ -4338,7 +4355,7 @@ class NextFEMrest:
         Returns:
             An array containing the IDs of newly created Tria elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/tria/'+str(maxTriaArea)+'/'+str(useAllNodes)+'/'+str(belt)+'/'+str(useQuad)+'/'+str(minAngle)+'', None, dict([("filled",json.dumps(filledContour)),("empty",json.dumps(emptyContour))])))
+        return des(self.nfrest('GET', '/op/mesh/tria/'+str(maxTriaArea)+'/'+str(useAllNodes)+'/'+str(belt)+'/'+str(useQuad)+'/'+str(minAngle)+'', None, dict([("filled",json.dumps(filledContour)),("empty",json.dumps(emptyContour))])))
     def meshAreaTriaMulti(self, filledContour:list, emptyContour:list, maxTriaArea, useAllNodes=False, belt=0, useQuad=False, minAngle=20):
         ''' Mesh planar areas with triangular or quadrilateral elements. This function has to be used when defined more than one hole per meshed region.
         
@@ -4354,7 +4371,7 @@ class NextFEMrest:
         Returns:
             An array containing the IDs of newly created Tria elements
         '''
-        return json.loads(self.nfrest('GET', '/op/mesh/triamulti/'+str(maxTriaArea)+'/'+str(useAllNodes)+'/'+str(belt)+'/'+str(useQuad)+'/'+str(minAngle)+'', None, dict([("filled",json.dumps(filledContour)),("empty",json.dumps(emptyContour))])))
+        return des(self.nfrest('GET', '/op/mesh/triamulti/'+str(maxTriaArea)+'/'+str(useAllNodes)+'/'+str(belt)+'/'+str(useQuad)+'/'+str(minAngle)+'', None, dict([("filled",json.dumps(filledContour)),("empty",json.dumps(emptyContour))])))
     def meshQuad2Wall(self, quadIDs:list, isHorizontal=False):
         ''' Mesh and group into wall a single quad element.
         
@@ -4896,7 +4913,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return json.loads(self.nfrest('POST', '/op/docx/bytes', readOnlyPassword, None))
+        return des(self.nfrest('POST', '/op/docx/bytes', readOnlyPassword, None))
     def saveDocXtoHTML(self, pageTitle):
         ''' Save the current DocX document to HTML format and return it as a string. After saving, the document cannot be modified, nor saved again.
         
@@ -4984,7 +5001,7 @@ class NextFEMrest:
         Returns:
             An array of double (2 columns)
         '''
-        return json.loads(self.nfrest('GET', '/function/series/'+str(funcID)+'', None, None))
+        return des(self.nfrest('GET', '/function/series/'+str(funcID)+'', None, None))
     def setAluSection(self, ID, SectionClass=3, Jw=0):
         ''' Set aluminium checking parameters for section
         
@@ -5256,7 +5273,7 @@ class NextFEMrest:
         Returns:
             A list of loaded elements
         '''
-        return json.loads(self.nfrest('GET', '/load/firepoint/'+qt(loadcase)+'/'+qt(fireNode)+'/'+str(targetTemp)+'/'+str(gradientY)+'/'+str(gradientZ)+'/'+str(tempAtten)+'/'+str(dontLoadUnder)+'', None, None))
+        return des(self.nfrest('GET', '/load/firepoint/'+qt(loadcase)+'/'+qt(fireNode)+'/'+str(targetTemp)+'/'+str(gradientY)+'/'+str(gradientZ)+'/'+str(tempAtten)+'/'+str(dontLoadUnder)+'', None, None))
     def setFloorLoad(self, name, loadcase, loadvalue, dirX, dirY, dirZ):
         ''' Add or modify floor load type
         
@@ -5786,7 +5803,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return json.loads(self.nfrest('POST', '/res/check/user'+qt(verName)+'', overrideValues, None))
+        return des(self.nfrest('POST', '/res/check/user'+qt(verName)+'', overrideValues, None))
     def valueFromFunction(self, Xval, funcID):
         ''' Get the value of the selected function corresponding to the desired abscissa
         
@@ -5898,7 +5915,7 @@ class NextFEMrest:
     @property
     def designMaterialsID(self)->list:
         '''   Get the list of design material IDs   '''
-        return json.loads(self.nfrest('GET','/designmaterials'))
+        return des(self.nfrest('GET','/designmaterials'))
     @property
     def DocXfontSize(self):
         '''   Change font size for DocX reporting tool. Default is 8   '''
@@ -5918,7 +5935,7 @@ class NextFEMrest:
     @property
     def DocXtableBorders(self)->list:
         '''   Change table borders: True=border present, False=no border. Default is True for all sides.   '''
-        return json.loads(self.nfrest('GET','/op/docx/tableborders'))
+        return des(self.nfrest('GET','/op/docx/tableborders'))
     @DocXtableBorders.setter
     def DocXtableBorders(self,value:list):
         '''   Change table borders: True=border present, False=no border. Default is True for all sides.   '''
@@ -5966,7 +5983,7 @@ class NextFEMrest:
     @property
     def elemsList(self)->list:
         '''   Get the list of element numbers   '''
-        return json.loads(self.nfrest('GET','/elements'))
+        return des(self.nfrest('GET','/elements'))
     @property
     def elemsNumber(self):
         '''   Get the number of elements in the model   '''
@@ -6042,7 +6059,7 @@ class NextFEMrest:
     @property
     def materialsID(self)->list:
         '''   Get the list of material IDs   '''
-        return json.loads(self.nfrest('GET','/materials'))
+        return des(self.nfrest('GET','/materials'))
     @property
     def modeldata(self):
         '''   Model in JSON format   '''
@@ -6082,7 +6099,7 @@ class NextFEMrest:
     @property
     def nodesList(self)->list:
         '''   Get the list of node numbers   '''
-        return json.loads(self.nfrest('GET','/nodes'))
+        return des(self.nfrest('GET','/nodes'))
     @property
     def nodesNumber(self):
         '''   Get the number of nodes in the model   '''
@@ -6298,7 +6315,7 @@ class NextFEMrest:
     @property
     def sectionsID(self)->list:
         '''   Get the list of section IDs   '''
-        return json.loads(self.nfrest('GET','/sections'))
+        return des(self.nfrest('GET','/sections'))
     @property
     def selAreaColor(self):
         '''   Change color for selected areas   '''
@@ -6310,7 +6327,7 @@ class NextFEMrest:
     @property
     def selectedElements(self)->list:
         '''   Get or set selected elements in viewport. REST version only against local instance of NextFEM Designer   '''
-        return json.loads(self.nfrest('GET','/op/selectedelements'))
+        return des(self.nfrest('GET','/op/selectedelements'))
     @selectedElements.setter
     def selectedElements(self,value:list):
         '''   Get or set selected elements in viewport. REST version only against local instance of NextFEM Designer   '''
@@ -6318,7 +6335,7 @@ class NextFEMrest:
     @property
     def selectedNodes(self)->list:
         '''   Get or set selected nodes in viewport. REST version only against local instance of NextFEM Designer   '''
-        return json.loads(self.nfrest('GET','/op/selectednodes'))
+        return des(self.nfrest('GET','/op/selectednodes'))
     @selectedNodes.setter
     def selectedNodes(self,value:list):
         '''   Get or set selected nodes in viewport. REST version only against local instance of NextFEM Designer   '''
