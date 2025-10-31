@@ -2043,6 +2043,17 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/element/exportdxf', None, dict([("path",path),("elements",json.dumps(elements))])))
+    def exportRCfloorDXF(self, path, groupName):
+        ''' Export the plan view of selected group of elements to DXF format. Top rebars will be shown in DXF plan, if present
+        
+        Args:
+            path: Path of the resulting DXF file
+            groupName: Name of the group containing the elments to include in the plan view
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/model/group/exportdxf/'+qt(groupName)+'', None, dict([("path",path)])))
     def exportRCmemberDXF(self, path, member):
         ''' Export the selected RC member to DXF format. Rebars and hoops will be inserted in DXF, if present
         
@@ -2334,6 +2345,16 @@ class NextFEMrest:
             An array containing a list of {abscissa,Vry,-Vry,Vrz,-Vrz}
         '''
         return des(self.nfrest('GET', '/res/check/beamshearres/'+qt(elemID)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
+    def getBillOfMaterials(self, selectedElements:list=None):
+        ''' Get the bill of materials of the current model, or for the selected elements
+        
+        Args:
+            selectedElements (optional): Array of selected element IDs
+
+        Returns:
+            The bill of materials as a list of string
+        '''
+        return des(self.nfrest('POST', '/model/bom', selectedElements, None))
     def getBuiltInChecking(self):
         ''' Get available checking scripts.
         
@@ -2342,6 +2363,16 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/res/check/sets', None, None))
+    def getCenterOfMass(self, selectedNodes:list=None):
+        ''' Return the center of mass of the model, or of the selected nodes
+        
+        Args:
+            selectedNodes (optional): Array of selected node IDs
+
+        Returns:
+            Array in form (x,y,z)
+        '''
+        return des(self.nfrest('POST', '/model/centermass', selectedNodes, None))
     def getCheckLogName(self, ID, lc, t, station=''):
         ''' Get the log entry name for a specific node/element check.
         
@@ -3788,6 +3819,14 @@ class NextFEMrest:
             Array of double of size 9, empty if error occurs
         '''
         return des(self.nfrest('GET', '/springproperty/axes/'+qt(elem)+'', None, None))
+    def getSpringProperties(self):
+        ''' Get a list of spring properties defined in the model
+        
+        
+        Returns:
+            Array of spring properties. For each line: ID kX kY kZ krX krY krZ Elastic_soil Winkler_modulus
+        '''
+        return des(self.nfrest('GET', '/springproperty/list', None, None))
     def getStaticLoadCases(self):
         ''' Get the names of static analysis loadcases set in the model.
         
@@ -3796,6 +3835,16 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/loadcases/static', None, None))
+    def getStoreyStiffnessTable(self, lc):
+        ''' Get the storey stiffness table for a given loadcase
+        
+        Args:
+            lc: Name of the loadcase that contains a set of lateral forces, for each storey
+
+        Returns:
+            Storey stiffness table as a list of list of string
+        '''
+        return des(self.nfrest('GET', '/model/storeystiff/'+qt(lc)+'', None, None))
     def getSubsoilElements(self):
         ''' Get a list of elements having subsoil springs
         
@@ -3814,6 +3863,16 @@ class NextFEMrest:
             Return nothing if empty results
         '''
         return des(self.nfrest('GET', '/res/periods/'+qt(lc)+'', None, None))
+    def getTotalMass(self, selectedNodes:list=None):
+        ''' Return the total mass of the model, or of the selected nodes
+        
+        Args:
+            selectedNodes (optional): Array of selected node IDs
+
+        Returns:
+            Array in form (Mx,My,Mz,Ix,Iy,Iz)
+        '''
+        return des(self.nfrest('POST', '/model/totalmass', selectedNodes, None))
     def getUserViews(self):
         ''' Get a list of names of user-defined model views
         
@@ -5900,6 +5959,10 @@ class NextFEMrest:
     def bordersColor(self,value):
         '''   Change color for borders in extruded view   '''
         self.nfrest('POST','/model/colors/border', heads={'val':str(value)})
+    @property
+    def colorRule(self):
+        '''   Current color rule used in elements: 1 by section, 2 by material, 3 by group   '''
+        return int(self.nfrest('GET','/model/colors/rule'))
     @property
     def constraintsColor(self):
         '''   Change color for constraints   '''
