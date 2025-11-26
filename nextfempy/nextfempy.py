@@ -917,6 +917,22 @@ class NextFEMrest:
             Boolean value
         '''
         return sbool(self.nfrest('GET', '/section/rebar/pattern/'+str(pattern)+'/'+str(sectionID)+'/'+str(numBars)+'/'+str(rebCover)+'/'+str(matID)+'/'+str(area)+'/'+str(netSpacing)+'', None, None))
+    def addRebarRowInSection(self, sectionID, numBars, latCover, hei, matID, Dmm, rebarPreStress=0):
+        ''' Add a rebar layer at a specified height of the section
+        
+        Args:
+            sectionID: ID of the section
+            numBars: Number of bars to be placed
+            latCover: Rebar cover from the centre of the first bar to the lateral side of the section
+            hei: Height of the rebar layer, from the bottom of the section
+            matID: ID of the associated design material
+            Dmm: Diameter of bars in mm
+            rebarPreStress (optional): 0 for steel rebar, otherwise prestress is specified
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/section/rebar/row/'+str(sectionID)+'/'+str(numBars)+'/'+str(latCover)+'/'+str(hei)+'/'+str(matID)+'/'+str(Dmm)+'/'+str(rebarPreStress)+'', None, None))
     def addRectangleInSection(self, sectionID, b, h, centerX, centerY, isEmpty=False, material=0, doNotCenter=False):
         ''' Add a rectangular figure in the selected section
         
@@ -1824,6 +1840,17 @@ class NextFEMrest:
             Converted value
         '''
         return float(self.nfrest('GET', '/units/convert/'+str(value)+'', None, dict([("OldUnits",OldUnits),("NewUnits",NewUnits)])))
+    def convertValueAuto(self, value, OldUnits):
+        ''' Convert units of a value in current model units.
+        
+        Args:
+            value: Numerical value to convert
+            OldUnits: Units of the input value. Eg. kN/cm^2
+
+        Returns:
+            Array of string with converted value and target units
+        '''
+        return des(self.nfrest('GET', '/units/convertauto/'+str(value)+'', None, dict([("OldUnits",OldUnits),("NewUnits",NewUnits)])))
     def createDocX(self, path, text:list, template=''):
         ''' Create a DocX file with the desired text
         
@@ -4006,16 +4033,6 @@ class NextFEMrest:
             False in case of error or GeneralDesign license missing
         '''
         return sbool(self.nfrest('GET', '/op/import/mesh', None, dict([("path",path)])))
-    def importMidas(self, path):
-        ''' Import a Midas GEN/Civil model in text format
-        
-        Args:
-            path: Full path of MGT/MCT file
-
-        Returns:
-            Boolean
-        '''
-        return sbool(self.nfrest('GET', '/op/import/midasfile', None, dict([("path",path)])))
     def importMidas(self, model:list):
         ''' Import a Midas GEN/Civil model in text format
         
@@ -4026,6 +4043,16 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('POST', '/op/import/midastext', model, None))
+    def importMidas(self, path):
+        ''' Import a Midas GEN/Civil model in text format
+        
+        Args:
+            path: Full path of MGT/MCT file
+
+        Returns:
+            Boolean
+        '''
+        return sbool(self.nfrest('GET', '/op/import/midasfile', None, dict([("path",path)])))
     def importMidasResults(self, path):
         ''' Read results from Midas GEN/Civil tables, copied to a text file
         
