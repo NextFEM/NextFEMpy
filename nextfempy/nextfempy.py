@@ -4033,16 +4033,6 @@ class NextFEMrest:
             False in case of error or GeneralDesign license missing
         '''
         return sbool(self.nfrest('GET', '/op/import/mesh', None, dict([("path",path)])))
-    def importMidas(self, model:list):
-        ''' Import a Midas GEN/Civil model in text format
-        
-        Args:
-            model: Array of model lines
-
-        Returns:
-            Boolean
-        '''
-        return sbool(self.nfrest('POST', '/op/import/midastext', model, None))
     def importMidas(self, path):
         ''' Import a Midas GEN/Civil model in text format
         
@@ -4053,6 +4043,16 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/midasfile', None, dict([("path",path)])))
+    def importMidas(self, model:list):
+        ''' Import a Midas GEN/Civil model in text format
+        
+        Args:
+            model: Array of model lines
+
+        Returns:
+            Boolean
+        '''
+        return sbool(self.nfrest('POST', '/op/import/midastext', model, None))
     def importMidasResults(self, path):
         ''' Read results from Midas GEN/Civil tables, copied to a text file
         
