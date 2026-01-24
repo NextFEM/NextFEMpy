@@ -1346,6 +1346,18 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/docx/appendimage/'+str(ratio)+'/'+str(alignment)+'', None, dict([("path",imagePath)])))
+    def appendDocXimageB(self, image, ratio=1, alignment=0):
+        ''' Append image, in PNG bytes, to an already opened DocX document. By default, this is aligned to center.
+        
+        Args:
+            image: Image bytes as string in Base64
+            ratio (optional): Size ratio of the picture
+            alignment (optional): Optional, default is 1. 0=left, 1=center, 2=right, 3=justified
+
+        Returns:
+            Boolean
+        '''
+        return sbool(self.nfrest('POST', '/op/docx/appendimageb/'+str(ratio)+'/'+str(alignment)+'', image, None))
     def appendDocXtext(self, text:list, alignment=0, color=0, bold=False, italic=False, underline=False):
         ''' Append text to an already opened DocX document
         
@@ -2496,7 +2508,7 @@ class NextFEMrest:
         '''
         return self.nfrest('GET', '/model/customdata/'+qt(key)+'', None, None)
     def getDataPlot(self, xseries:list, yseries:list, transparent, name='', Xunits='', Yunits='', color=0, useDots=True):
-        ''' Get plot of the given user data as array of bytes
+        ''' Get plot of the given user data in a PNG image
         
         Args:
             xseries: X series of user data
@@ -2511,7 +2523,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return des(self.nfrest('GET', '/function/plotdata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)])))
+        return self.nfrestB('GET', '/function/plotdata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)]))
     def getDefinedDesignMaterials(self):
         ''' Return a list of used design material IDs
         
@@ -2781,7 +2793,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return des(self.nfrest('GET', '/op/sectioncalc/fireimage/'+str(elemID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None))
+        return self.nfrestB('GET', '/op/sectioncalc/fireimage/'+str(elemID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None)
     def getFirstMode(self, ct=0.05, direction=0):
         ''' Get from results or estimate the fundamental period of the structure. If no results are available, relationship as per EC8 4.6 is used.
         
@@ -3269,7 +3281,7 @@ class NextFEMrest:
         '''
         return int(self.nfrest('GET', '/res/modes/'+str(loadcase)+'', None, None))
     def getMultiplePlots(self, plotList:list, transparent=False, names:list=None, Xunits='', Yunits='', colors:list=None, useDots:list=None, showLegend=False):
-        ''' Get plots of multiple series in a single image
+        ''' Get plots of multiple series in a single PNG image
         
         Args:
             plotList: List of list of double[2] arrays
@@ -3284,7 +3296,7 @@ class NextFEMrest:
         Returns:
             List of arrays of bytes
         '''
-        return des(self.nfrest('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)])))
+        return self.nfrestB('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)]))
     def getNodalDisp(self, num, loadcase, time, direction):
         ''' Get nodal displacement from the selected loadcase and time
         
@@ -3566,7 +3578,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return des(self.nfrest('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None))
+        return self.nfrestB('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None)
     def getSectionOffset(self, ID):
         ''' Get the section offset for selected beam element
         
@@ -4073,6 +4085,17 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('POST', '/op/import/midasresulttext', text, None))
+    def importMidasResultsAPI(self, MAPIkey, resultsToImport:list):
+        ''' Import Midas results from Midas GEN NX/Civil NX API
+        
+        Args:
+            MAPIkey: Required, get it from your running Midas program
+            resultsToImport: Array of boolean to select results to import: ["Beam forces", "Truss forces", "Displacements", "RS forces", "Wall forces", "Elastic link forces", "Plate local forces"]
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('POST', '/op/import/midasresultapi', resultsToImport, dict([("mapi",MAPIkey)])))
     def importNodeElemFiles(self, path):
         ''' Import a node/elem set of file
         
@@ -4999,7 +5022,7 @@ class NextFEMrest:
         Returns:
             Array of bytes
         '''
-        return des(self.nfrest('POST', '/op/docx/bytes', readOnlyPassword, None))
+        return self.nfrestB('POST', '/op/docx/bytes', readOnlyPassword, None)
     def saveDocXtoHTML(self, pageTitle):
         ''' Save the current DocX document to HTML format and return it as a string. After saving, the document cannot be modified, nor saved again.
         
