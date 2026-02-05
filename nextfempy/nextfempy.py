@@ -65,7 +65,7 @@ class NextFEMrest:
             for dd in headersDict:
                 self.headers[dd]=headersDict[dd]
 
-    def nfrest(self, method, command, body=None, heads=None):
+    def nfrest(self, method, command, body=None, heads=None)->str:
         url = self.baseUrl + command
         hds=dict()
         for dd in self.headers:
@@ -85,7 +85,7 @@ class NextFEMrest:
         if self.msg: print("*** " + self.user + " :: " + method, command, response.status_code)
         return response.text
 
-    def nfrestB(self, method, command, body=None, heads=None):
+    def nfrestB(self, method, command, body=None, heads=None)->bytes:
         # return bytes
         url = self.baseUrl + command
         hds=dict()
@@ -807,6 +807,16 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/designmaterial/prop/'+str(ID)+'/'+qt(name)+'/'+qt(value)+'/'+qt(units)+'', None, None))
+    def addOrChangeLoadCombinationsTable(self, table:list):
+        ''' Add or change the load combinations table set in the model. Function needs General Design license.
+        
+        Args:
+            table
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('POST', '/loadcases/combostable', table, None))
     def addOrChangeMaterialProperty(self, ID, name, value, units=''):
         ''' Add or modify a custom property of the selected material
         
@@ -1862,7 +1872,7 @@ class NextFEMrest:
         Returns:
             Array of string with converted value and target units
         '''
-        return des(self.nfrest('GET', '/units/convertauto/'+str(value)+'', None, dict([("OldUnits",OldUnits),("NewUnits",NewUnits)])))
+        return des(self.nfrest('GET', '/units/convertauto/'+str(value)+'', None, dict([("OldUnits",OldUnits)])))
     def createDocX(self, path, text:list, template=''):
         ''' Create a DocX file with the desired text
         
@@ -3076,6 +3086,16 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/loadcases/combos/'+str(includeEnvelopes)+'', None, None))
+    def getLoadCombinationsTable(self, includeEnvelopes=True):
+        ''' Get the load combinations table set in the model.
+        
+        Args:
+            includeEnvelopes (optional): Optional. False to exclude envelopes
+
+        Returns:
+            Array of strings
+        '''
+        return des(self.nfrest('GET', '/loadcases/combostable/'+str(includeEnvelopes)+'', None, None))
     def getLoadDurationClass(self, loadcase):
         ''' Returns the load duration class for the requested loadcase
         
@@ -3296,7 +3316,7 @@ class NextFEMrest:
         Returns:
             List of arrays of bytes
         '''
-        return self.nfrestB('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+json.dumps(colors)+'/'+json.dumps(useDots)+'/'+str(showLegend)+'', plotList, dict([("colors",xseries),("useDots",yseries)]))
+        return self.nfrestB('POST', '/function/plotmultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+str(showLegend)+'', plotList, dict([("colors",json.dumps(colors)),("useDots",json.dumps(useDots))]))
     def getNodalDisp(self, num, loadcase, time, direction):
         ''' Get nodal displacement from the selected loadcase and time
         
@@ -5174,7 +5194,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/loadcase/setbuck/'+qt(name)+'/'+str(Nmodes)+'/'+str(tol)+'', None, None))
     def setCombination(self, name, loadcase, factor, type=0, servType=0):
-        ''' Set a linear add combination from an existing loadcase. It can be called multiple times.
+        ''' Set a linear add combination from an existing loadcase. It can be called multiple times. If the loadcase is already in combination, change its factor.
         
         Args:
             name: Name of the loadcase to transform into a combination, or target combination
@@ -5342,7 +5362,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('POST', '/element/beamendrelease/'+qt(beamID)+'/'+qt(node)+'/'+str(useStiffness)+'', None, dict([("DOFmask",json.dumps(DOFmask))])))
     def setEnvelope(self, name, loadcase, factor, type=0, servType=0):
-        ''' Set an envelope combination from an existing loadcase. It can be called multiple times.
+        ''' Set an envelope combination from an existing loadcase. It can be called multiple times. If the loadcase is already in combination, change its factor.
         
         Args:
             name: Name of the loadcase to transform into a combination, or target combination
@@ -5441,7 +5461,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/loadcase/setfactor/'+qt(loadcase)+'/'+str(factor)+'', None, None))
     def setLoadCasePhaseInCombination(self, name, loadcase, phase):
-        ''' Set the phase to a loadcase in an already existing combination, for analysis
+        ''' Set the phase to a loadcase in an already existing combination, for analysis. Useful in buckling analysis to distinguish constant from variable loading cases
         
         Args:
             name: Name of the combination or buckling analysis
