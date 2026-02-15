@@ -3,13 +3,13 @@ import requests,json,urllib,os,urllib3
 # Disable InsecureRequestWarning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def sbool(arg):
+def sbool(arg)->bool:
     if arg=="True":
         return True
     else:
         return False
 
-def qt(s):
+def qt(s)->str:
     try:
         return str(urllib.parse.quote(s, safe=''))
     except:
@@ -109,6 +109,20 @@ class NextFEMrest:
         ''' Save the model on server '''
         return sbool(self.nfrest('GET', '/op/saveuser'))
     # get file from server, return bytes
+    def userFileB(self, filename)->bytes:
+        ''' Get a file from server, return bytes
+        
+        Args:
+            filename: Name of the file to get
+        
+        Returns:
+            Bytes
+        '''
+        bts=self.nfrestB('GET', '/op/userfile', None, dict([("path",filename)]))
+        if bts==b'False': 
+            return b''
+        return bts
+    # get file from server, save it locally, return True if successful
     def userFile(self, filename, localPath):
         ''' Get a file from server, return bytes
         
@@ -337,7 +351,7 @@ class NextFEMrest:
             ID of the added material, 0 if not found
         '''
         return int(self.nfrest('POST', '/designmaterial/add/fromlib', name, None))
-    def addDesMaterial(self, name, E, fk, ni=0, type=0):
+    def addDesMaterial(self, name, E, fk, ni=0, type_=0):
         ''' Add a design material from scratch. Uniaxial type is required (e.g. rebar, FRP, etc.)
         
         Args:
@@ -345,12 +359,12 @@ class NextFEMrest:
             E: Young's modulus
             fk: Characteristic strength
             ni (optional): Optional. Poisson's ratio
-            type (optional): Optional. Integer to set materal type for checking: 1 steel, aluminium 2, concrete 3, timber 4, masonry 5, tensionFragile 6
+            type_ (optional): Optional. Integer to set materal type for checking: 1 steel, aluminium 2, concrete 3, timber 4, masonry 5, tensionFragile 6
 
         Returns:
             ID of the added material
         '''
-        return int(self.nfrest('GET', '/material/add/des/'+qt(name)+'/'+str(E)+'/'+str(fk)+'/'+str(ni)+'/'+str(type)+'', None, None))
+        return int(self.nfrest('GET', '/material/add/des/'+qt(name)+'/'+str(E)+'/'+str(fk)+'/'+str(ni)+'/'+str(type_)+'', None, None))
     def addDLSection(self, Lz, Ly, tw, tf1, gap):
         ''' Add a new beam double L section to the model.
         
@@ -424,12 +438,12 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/section/add/fill/'+str(sectionID)+'/'+str(material)+'/'+str(doNotCenter)+'', None, dict([("x",json.dumps(x)),("y",json.dumps(y))])))
-    def addFloorPlane(self, name, type, n1, n2, n3, n4=''):
+    def addFloorPlane(self, name, type_, n1, n2, n3, n4=''):
         ''' Add a floor plane load to the model
         
         Args:
             name: Name of the floor load to be used
-            type: Distribution of the floor load: 1 triangular - 2 quadrangular-centroid - 3 oriented quadrangular - 4 two-way quadrangular
+            type_: Distribution of the floor load: 1 triangular - 2 quadrangular-centroid - 3 oriented quadrangular - 4 two-way quadrangular
             n1: 1st node
             n2: 2nd node
             n3: 3rd node
@@ -438,7 +452,7 @@ class NextFEMrest:
         Returns:
             True if successful, False if not or if nodes don't form a plane or beam elements don't cover the entire perimeter
         '''
-        return sbool(self.nfrest('GET', '/load/floor/planeadd/'+qt(name)+'/'+str(type)+'/'+qt(n1)+'/'+qt(n2)+'/'+qt(n3)+'/'+qt(n4)+'', None, None))
+        return sbool(self.nfrest('GET', '/load/floor/planeadd/'+qt(name)+'/'+str(type_)+'/'+qt(n1)+'/'+qt(n2)+'/'+qt(n3)+'/'+qt(n4)+'', None, None))
     def addGroup(self, name):
         ''' Add an empty group to the model
         
@@ -463,7 +477,7 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/section/add/hole/'+str(sectionID)+'/'+str(material)+'/'+str(doNotCenter)+'', None, dict([("x",json.dumps(x)),("y",json.dumps(y))])))
-    def addIsoMaterial(self, name, E, ni, Wden, fk=0, conductivity=0, specificHeat=0, type=0):
+    def addIsoMaterial(self, name, E, ni, Wden, fk=0, conductivity=0, specificHeat=0, type_=0):
         ''' Add an isotropic material from scratch
         
         Args:
@@ -474,12 +488,12 @@ class NextFEMrest:
             fk (optional): Characteristic strength
             conductivity (optional): Conductivity, for thermal analysis
             specificHeat (optional): Specific heat, for thermal analysis
-            type (optional): Optional. Integer to set materal type for checking: 1 steel, aluminium 2, concrete 3, timber 4, masonry 5, tensionFragile 6
+            type_ (optional): Optional. Integer to set materal type for checking: 1 steel, aluminium 2, concrete 3, timber 4, masonry 5, tensionFragile 6
 
         Returns:
             ID of the added material
         '''
-        return int(self.nfrest('GET', '/material/add/iso/'+qt(name)+'/'+str(E)+'/'+str(ni)+'/'+str(Wden)+'/'+str(fk)+'/'+str(conductivity)+'/'+str(specificHeat)+'/'+str(type)+'', None, None))
+        return int(self.nfrest('GET', '/material/add/iso/'+qt(name)+'/'+str(E)+'/'+str(ni)+'/'+str(Wden)+'/'+str(fk)+'/'+str(conductivity)+'/'+str(specificHeat)+'/'+str(type_)+'', None, None))
     def addLayeredPlanarSection(self, layerThicknesses:list, layerMaterials:list):
         ''' Add a new layered planar section to the model
         
@@ -1032,20 +1046,20 @@ class NextFEMrest:
             The ID assigned to the section.
         '''
         return int(self.nfrest('GET', '/section/add/fromdxf/'+str(CF_tw)+'/'+str(CF_rc)+'/'+str(material)+'', None, dict([("path",path)])))
-    def addSeriesFunction(self, Xlist:list, Ylist:list, type, units=''):
+    def addSeriesFunction(self, Xlist:list, Ylist:list, type_, units=''):
         ''' Add a time series function to the model
         
         Args:
             Xlist: Array of times/periods
             Ylist: Array of values, same size of Xlist
-            type: 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
+            type_: 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
             units (optional): Units of measure for data in ordinate (Y)
 
         Returns:
             The ID of the time series, -1 in case of errors
         '''
-        return int(self.nfrest('GET', '/function/add/'+str(type)+'', None, dict([("x",json.dumps(Xlist)),("y",json.dumps(Ylist)),("units",units)])))
-    def addSineFunction(self, frequency, phase, stp, duration, maxAmplitude, isGrowing=False, type=0, units=''):
+        return int(self.nfrest('GET', '/function/add/'+str(type_)+'', None, dict([("x",json.dumps(Xlist)),("y",json.dumps(Ylist)),("units",units)])))
+    def addSineFunction(self, frequency, phase, stp, duration, maxAmplitude, isGrowing=False, type_=0, units=''):
         ''' Add a sine function to the model. It can be growing or not.
         
         Args:
@@ -1055,13 +1069,13 @@ class NextFEMrest:
             duration: Duration of the function
             maxAmplitude: Amplitude of the function
             isGrowing (optional): Optional: True if growing sine function. Default: false.
-            type (optional): Optional: 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
+            type_ (optional): Optional: 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
             units (optional): Optional: Units of measure for data in ordinate (Y)
 
         Returns:
             The ID of the time series
         '''
-        return int(self.nfrest('GET', '/function/sine/'+str(frequency)+'/'+str(phase)+'/'+str(stp)+'/'+str(duration)+'/'+str(maxAmplitude)+'/'+str(isGrowing)+'/'+str(type)+'', None, dict([("units",units)])))
+        return int(self.nfrest('GET', '/function/sine/'+str(frequency)+'/'+str(phase)+'/'+str(stp)+'/'+str(duration)+'/'+str(maxAmplitude)+'/'+str(isGrowing)+'/'+str(type_)+'', None, dict([("units",units)])))
     def addSolid(self, nodes:list, mat=0):
         ''' Add a solid element to the model. Element type is set on the size of the number of nodes
         
@@ -1480,16 +1494,16 @@ class NextFEMrest:
             False if not existing, True otherwise
         '''
         return sbool(self.nfrest('GET', '/group/assign/'+qt(name)+'/'+str(clear)+'', None, dict([("nodes",json.dumps(nodes)),("elements",json.dumps(elements))])))
-    def changeDefSolverType(self, type):
+    def changeDefSolverType(self, type_):
         ''' Change the system of equation type in standard solver
         
         Args:
-            type: 0 for default (slow, lability detection), 1 for DSS (fast, less memory consumption), 2 for SPOOLES (fast)
+            type_: 0 for default (slow, lability detection), 1 for DSS (fast, less memory consumption), 2 for SPOOLES (fast)
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/op/opt/changedefsolvertype/'+str(type)+'', None, None))
+        return sbool(self.nfrest('GET', '/op/opt/changedefsolvertype/'+str(type_)+'', None, None))
     def changeElementProperty(self, ID, prop, value):
         ''' Change element property
         
@@ -1527,17 +1541,17 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/section/add/changeaddpt/'+str(sectionID)+'/'+str(seriesID)+'/'+str(ptID)+'/'+str(x)+'/'+str(y)+'', None, None))
-    def changeSolver(self, type, path=''):
+    def changeSolver(self, type_, path=''):
         ''' Change the default solver
         
         Args:
-            type: 0 for default solver, 1 for OpenSees, 2 for CalculiX
+            type_: 0 for default solver, 1 for OpenSees, 2 for CalculiX
             path (optional): Optional. Full path to the solver assembly.
 
         Returns:
             True if successful, False if path is missing
         '''
-        return sbool(self.nfrest('GET', '/op/opt/changesolver/'+str(type)+'', None, dict([("path",path)])))
+        return sbool(self.nfrest('GET', '/op/opt/changesolver/'+str(type_)+'', None, dict([("path",path)])))
     def changeSpringNLProperty(self, name, NLdofs:list, NLprops:list):
         ''' Change a non-linear spring property already defined in the model
         
@@ -1817,18 +1831,18 @@ class NextFEMrest:
             
         '''
         return self.nfrest('GET', '/model/colors/colorize/'+str(criterion)+'', None, dict([("excl",json.dumps(excl))]))
-    def compileDocX(self, dict:list, tableDict:list=None, twoPasses=False):
+    def compileDocX(self, dict_:list, tableDict:list=None, twoPasses=False):
         ''' Compile the open document for keyword substitution
         
         Args:
-            dict: Dictionary of the keywords to be replaced by its values
+            dict_: Dictionary of the keywords to be replaced by its values
             tableDict (optional): Dictionary of keywords to be replaced by a table, described by a list of string() - each item of the list represents the single row as an array of string
             twoPasses (optional): Enable double pass for the document
 
         Returns:
             True
         '''
-        return sbool(self.nfrest('POST', '/op/docx/compile/'+str(twoPasses)+'', tableDict, dict([("dict",json.dumps(dict))])))
+        return sbool(self.nfrest('POST', '/op/docx/compile/'+str(twoPasses)+'', tableDict, dict([("dict",json.dumps(dict_))])))
     def convertToMeshedSection(self, sectionID):
         ''' Convert an existing section to a new tria-meshed section. Remember to re-assign the new section to elements with assignSectionToElement
         
@@ -2178,18 +2192,18 @@ class NextFEMrest:
             
         '''
         return sbool(self.nfrest('GET', '/op/export/xmlres', None, dict([("path",filename)])))
-    def functionFromFile(self, filename, type=9, units=''):
+    def functionFromFile(self, filename, type_=9, units=''):
         ''' Load a function from text file.
         
         Args:
             filename: Path of the text file containing function to load
-            type (optional): 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
+            type_ (optional): 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
             units (optional): Units of measure for data in ordinate (Y)
 
         Returns:
             The ID of the time series, -1 in case of errors
         '''
-        return int(self.nfrest('GET', '/function/fromfile/'+str(type)+'', None, dict([("units",units),("path",filename)])))
+        return int(self.nfrest('GET', '/function/fromfile/'+str(type_)+'', None, dict([("units",units),("path",filename)])))
     def generateFrame(self, baysX, baysY, sn, ddx, ddy, ddz, sx, sy, sz, matx, maty, matz, lc1='', lc2='', lc3='', Lval1=0, Lval2=0, Lval3=0, loadBeamX=False, rigidfloor=False):
         ''' Generate a spatial frame of desired characteristics
         
@@ -2219,17 +2233,17 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/op/mesh/generateframe/'+str(baysX)+'/'+str(baysY)+'/'+str(sn)+'/'+str(ddx)+'/'+str(ddy)+'/'+str(ddz)+'/'+str(sx)+'/'+str(sy)+'/'+str(sz)+'/'+str(matx)+'/'+str(maty)+'/'+str(matz)+'/'+qt(lc1)+'/'+qt(lc2)+'/'+qt(lc3)+'/'+str(Lval1)+'/'+str(Lval2)+'/'+str(Lval3)+'/'+str(loadBeamX)+'/'+str(rigidfloor)+'', None, None))
-    def generateLoadCombinations(self, type, comboPrefix=''):
+    def generateLoadCombinations(self, type_, comboPrefix=''):
         ''' Generate load combinations as per EC1. General Design license is needed to run.
         
         Args:
-            type: Combinations set type: Fundamental 0, Characteristic 1, Frequent 2, Quasi_permanent 3, Serviceability 4, Seismic 5, All 6
+            type_: Combinations set type: Fundamental 0, Characteristic 1, Frequent 2, Quasi_permanent 3, Serviceability 4, Seismic 5, All 6
             comboPrefix (optional): Optional prefix for generated combinations
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/loadcase/generate/'+str(type)+'/'+qt(comboPrefix)+'', None, None))
+        return sbool(self.nfrest('GET', '/loadcase/generate/'+str(type_)+'/'+qt(comboPrefix)+'', None, None))
     def getAlignedNodes(self, n1, n2, tol=0):
         ''' Return nodes aligned with the given two as input
         
@@ -2262,27 +2276,27 @@ class NextFEMrest:
             Boolean array containing True if DOF is restrained
         '''
         return des(self.nfrest('GET', '/bc/get/'+qt(node)+'', None, None))
-    def getBeamDeflection(self, num, loadcase, time, type, station):
+    def getBeamDeflection(self, num, loadcase, time, type_, station):
         ''' Get beam deflection for the selected element, loadcase, time and station
         
         Args:
             num: element no.
             loadcase: 
             time: For linear analysis, set as 1
-            type: 1=local x, 2=local y, 3=local z, 4=local rx, 5=local ry, 6=local rz
+            type_: 1=local x, 2=local y, 3=local z, 4=local rx, 5=local ry, 6=local rz
             station: Usually a beam has 5 stations (1, 2, 3, 4 or 5)
 
         Returns:
             The requested value. 0 if something went wrong.
         '''
-        return float(self.nfrest('GET', '/res/beamdeflection/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type)+'/'+str(station)+'', None, None))
-    def getBeamDeflections(self, num, loadcase, type, offsetL=0, numStations=21, time='1'):
+        return float(self.nfrest('GET', '/res/beamdeflection/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type_)+'/'+str(station)+'', None, None))
+    def getBeamDeflections(self, num, loadcase, type_, offsetL=0, numStations=21, time='1'):
         ''' Get the beam deflections for the selected number of stations along beam
         
         Args:
             num: Element no.
             loadcase: Loadcase name
-            type: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
+            type_: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
             offsetL (optional): Optional. Offset to queue output to another beam (length of the preceding beam).
             numStations (optional): Optional. Number of stations, default is 21.
             time (optional): Optional. Time for non-linear analysis. Default is 1.
@@ -2290,35 +2304,35 @@ class NextFEMrest:
         Returns:
             A check structure with positions and values
         '''
-        return self.nfrest('GET', '/res/beamdeflections/'+qt(num)+'/'+qt(loadcase)+'/'+str(type)+'/'+str(offsetL)+'/'+str(numStations)+'/'+qt(time)+'', None, None)
-    def getBeamForce(self, num, loadcase, time, type, station):
+        return self.nfrest('GET', '/res/beamdeflections/'+qt(num)+'/'+qt(loadcase)+'/'+str(type_)+'/'+str(offsetL)+'/'+str(numStations)+'/'+qt(time)+'', None, None)
+    def getBeamForce(self, num, loadcase, time, type_, station):
         ''' Get beam force for the selected element, loadcase, time and station
         
         Args:
             num: element no.
             loadcase: loadcase name
             time: For linear analysis, set as 1
-            type: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
+            type_: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
             station: Usually a beam has 5 stations (1, 2, 3, 4 or 5)
 
         Returns:
             The requested value. 0 if something went wrong.
         '''
-        return float(self.nfrest('GET', '/res/beamforce/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type)+'/'+str(station)+'', None, None))
-    def getBeamForce2(self, num, loadcase, time, type, absissa):
+        return float(self.nfrest('GET', '/res/beamforce/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type_)+'/'+str(station)+'', None, None))
+    def getBeamForce2(self, num, loadcase, time, type_, absissa):
         ''' Get beam force for the selected element, loadcase, time and absissa
         
         Args:
             num: element no.
             loadcase: loadcase name
             time: For linear analysis, set as 1
-            type: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
+            type_: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
             absissa: Usually a beam has 5 stations (1, 2, 3, 4 or 5)
 
         Returns:
             The requested value. 0 if something went wrong.
         '''
-        return float(self.nfrest('GET', '/res/beamforce2/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type)+'/'+str(absissa)+'', None, None))
+        return float(self.nfrest('GET', '/res/beamforce2/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type_)+'/'+str(absissa)+'', None, None))
     def getBeamForces(self, num, loadcase, station, time='1'):
         ''' Get all the beam forces for the selected element, loadcase, time and station
         
@@ -2345,13 +2359,13 @@ class NextFEMrest:
             A vector of size 6. Null vector if something went wrong
         '''
         return des(self.nfrest('GET', '/res/beamforcesatnode/'+qt(elem)+'/'+qt(node)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
-    def getBeamForcesDiagram(self, num, loadcase, type, offsetL=0, numStations=21, time='1'):
+    def getBeamForcesDiagram(self, num, loadcase, type_, offsetL=0, numStations=21, time='1'):
         ''' Get the beam diagrams values for the selected number of stations along beam
         
         Args:
             num: Element no.
             loadcase: Loadcase name
-            type: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
+            type_: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
             offsetL (optional): Optional. Offset to queue output to another beam (length of the preceding beam).
             numStations (optional): Optional. Number of stations, default is 21.
             time (optional): Optional. Time for non-linear analysis. Default is 1.
@@ -2359,7 +2373,7 @@ class NextFEMrest:
         Returns:
             A check structure with positions and values
         '''
-        return self.nfrest('GET', '/res/beamdiagram/'+qt(num)+'/'+qt(loadcase)+'/'+str(type)+'/'+str(offsetL)+'/'+str(numStations)+'/'+qt(time)+'', None, None)
+        return self.nfrest('GET', '/res/beamdiagram/'+qt(num)+'/'+qt(loadcase)+'/'+str(type_)+'/'+str(offsetL)+'/'+str(numStations)+'/'+qt(time)+'', None, None)
     def getBeamForcesEnvelopeTable(self, num, stationsMode, loadcases:list=None):
         ''' Get beam forces consistent envelope, as a table. Envelopes are made on specified loadcases, or on all result cases. Suitable for many combinations or for time-history analyses.
         
@@ -2445,17 +2459,17 @@ class NextFEMrest:
             String
         '''
         return self.nfrest('GET', '/res/check/checkbymat/'+qt(ID)+'', None, None)
-    def getCombinationCoeffPsi(self, subscript, type):
+    def getCombinationCoeffPsi(self, subscript, type_):
         ''' Get the current psi combination coefficient
         
         Args:
             subscript: 0 for psi0, 1 for psi1, 2 for psi2
-            type: 1 for variable loading, 2 for wind loads, 3 for snow loading
+            type_: 1 for variable loading, 2 for wind loads, 3 for snow loading
 
         Returns:
             Double value
         '''
-        return float(self.nfrest('GET', '/loadcase/getpsi/'+str(subscript)+'/'+str(type)+'', None, None))
+        return float(self.nfrest('GET', '/loadcase/getpsi/'+str(subscript)+'/'+str(type_)+'', None, None))
     def getCombinationDesignType(self, name):
         ''' Returns an integer representing the combination type
         
@@ -2466,17 +2480,17 @@ class NextFEMrest:
             -1 if not defined, 0 Ultimate Limit State, 1 Seismic combination, 2 Serviceability, 3 Serviceability-Characteristic, 4 Serviceability-Frequent, 5 Serviceability-QuasiPermanent
         '''
         return int(self.nfrest('GET', '/loadcase/combo/designtype/'+qt(name)+'', None, None))
-    def getCombinationsByDesignType(self, type, servType=0):
+    def getCombinationsByDesignType(self, type_, servType=0):
         ''' Get an array of linear add combinations of the selected design type
         
         Args:
-            type: The combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
+            type_: The combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
             servType (optional): The serviceability combination type for checking: 0 (default) unknown, 1 characteristic, 2 frequent, 3 quasi-permanent
 
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/loadcases/descombos/designtype/'+str(type)+'/'+str(servType)+'', None, None))
+        return des(self.nfrest('GET', '/loadcases/descombos/designtype/'+str(type_)+'/'+str(servType)+'', None, None))
     def getConnectedElements(self, node, onlyOfType=-1):
         ''' Get all the elements connected to the specified node
         
@@ -2570,29 +2584,29 @@ class NextFEMrest:
             The requested value as string. Empty in case of error
         '''
         return self.nfrest('GET', '/designmaterial/prop/'+qt(ID)+'/'+qt(name)+'', None, dict([("units",units)]))
-    def getDesignMaterialsLibrary(self, filter='', type=0):
+    def getDesignMaterialsLibrary(self, filter='', type_=0):
         ''' Return an array of string containing design material names from built-in library.
         
         Args:
             filter (optional): Optional. String supporting wildcards for material name
-            type (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
+            type_ (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
 
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/designmaterials/library/'+qt(filter)+'/'+str(type)+'', None, None))
-    def getDesignMaterialsLibrary(self, filename, filter='', type=0):
+        return des(self.nfrest('GET', '/designmaterials/library/'+qt(filter)+'/'+str(type_)+'', None, None))
+    def getDesignMaterialsLibrary(self, filename, filter='', type_=0):
         ''' Return an array of string containing design material names from built-in library.
         
         Args:
             filename: Name of the nfm library, without extension
             filter (optional): Optional. String supporting wildcards for material name
-            type (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
+            type_ (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
 
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
+        return des(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type_)+'', None, None))
     def getDocXheadings(self):
         ''' Get a list of headings contained in the current DocX document.
         
@@ -3186,51 +3200,51 @@ class NextFEMrest:
             The requested value as string. Empty in case of error
         '''
         return self.nfrest('GET', '/material/prop/'+qt(ID)+'/'+qt(name)+'', None, dict([("units",units)]))
-    def getMaterialsLibrary(self, filter='', type=0):
+    def getMaterialsLibrary(self, filter='', type_=0):
         ''' Return an array of string containing material names from built-in library.
         
         Args:
             filter (optional): Optional. String supporting wildcards for material name
-            type (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
+            type_ (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
 
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/materials/library/'+qt(filter)+'/'+str(type)+'', None, None))
-    def getMaterialsLibrary(self, filename, filter='', type=0):
+        return des(self.nfrest('GET', '/materials/library/'+qt(filter)+'/'+str(type_)+'', None, None))
+    def getMaterialsLibrary(self, filename, filter='', type_=0):
         ''' Return an array of string containing material names from built-in library.
         
         Args:
             filename: Name of the nfm library, without extension
             filter (optional): Optional. String supporting wildcards for material name
-            type (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
+            type_ (optional): Optional. Integer for material type: Steel = 1, Aluminium = 2, Concrete = 3, Timber = 4, Masonry = 5, TensionFragile = 6
 
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/materials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type)+'', None, None))
-    def getMaxMinBeamForces(self, sectionID, type):
+        return des(self.nfrest('GET', '/materials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type_)+'', None, None))
+    def getMaxMinBeamForces(self, sectionID, type_):
         ''' Get maximum and minimum beam forces from elements having the same section, in all loadcases and all stations
         
         Args:
             sectionID: Section ID
-            type: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
+            type_: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
 
         Returns:
             An array of length 2 containing max and min force for the desired type
         '''
-        return des(self.nfrest('GET', '/res/maxminbeamforces/'+str(sectionID)+'/'+str(type)+'', None, None))
-    def getMaxMinNodeDispl(self, dir, nodes:list=None):
+        return des(self.nfrest('GET', '/res/maxminbeamforces/'+str(sectionID)+'/'+str(type_)+'', None, None))
+    def getMaxMinNodeDispl(self, dir_, nodes:list=None):
         ''' Get maximum and minimum nodal displacement from all nodal results.
         
         Args:
-            dir: Direction: 1 xyz, 2 x, 3 y, 4 z, 5 xy, 6 yz, 7 xz, 8 rxyz (rotations)
+            dir_: Direction: 1 xyz, 2 x, 3 y, 4 z, 5 xy, 6 yz, 7 xz, 8 rxyz (rotations)
             nodes (optional): 
 
         Returns:
             
         '''
-        return des(self.nfrest('POST', '/res/maxmindispl/'+str(dir)+'', nodes, None))
+        return des(self.nfrest('POST', '/res/maxmindispl/'+str(dir_)+'', nodes, None))
     def getMaxMinWoodArmerMoments(self, elementID):
         ''' Get maximum and minimun Wood-Armer moments from elements in the same group of the selected element
         
@@ -3343,32 +3357,32 @@ class NextFEMrest:
             The requested value. 0 if something went wrong.
         '''
         return float(self.nfrest('GET', '/res/reaction/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(direction)+'', None, None))
-    def getNodalShellForce(self, num, loadcase, time, type):
+    def getNodalShellForce(self, num, loadcase, time, type_):
         ''' Get nodal shell forces from nodes connected to shell elements
         
         Args:
             num: Node number
             loadcase: Loadcase name
             time: Time value in results, for linear analyses is 1
-            type: Name of the property to get
+            type_: Name of the property to get
 
         Returns:
             The requested value. 0 if something went wrong.
         '''
-        return float(self.nfrest('GET', '/res/nodalshellforce/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+qt(type)+'', None, None))
-    def getNodalStress(self, num, loadcase, time, type):
+        return float(self.nfrest('GET', '/res/nodalshellforce/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+qt(type_)+'', None, None))
+    def getNodalStress(self, num, loadcase, time, type_):
         ''' Get stress from node
         
         Args:
             num: Node number
             loadcase: Loadcase name
             time: Time value in results, for linear analyses is 1
-            type: Name of the property to get
+            type_: Name of the property to get
 
         Returns:
             The requested value. 0 if something went wrong.
         '''
-        return float(self.nfrest('GET', '/res/nodalstress/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+qt(type)+'', None, None))
+        return float(self.nfrest('GET', '/res/nodalstress/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+qt(type_)+'', None, None))
     def getNodeChecks(self, ID, lc, time):
         ''' Get the checks stored in the model for the specified node
         
@@ -3433,18 +3447,18 @@ class NextFEMrest:
             Null if no checking are available
         '''
         return des(self.nfrest('GET', '/res/check/nodesA/'+qt(lc)+'/'+qt(time)+'', None, None))
-    def getNodesFromCoords(self, dir, coord, tol=1E-06):
+    def getNodesFromCoords(self, dir_, coord, tol=1E-06):
         ''' Get nodes having the specified coordinates
         
         Args:
-            dir: 1 for X, 2 for Y and 3 for Z
+            dir_: 1 for X, 2 for Y and 3 for Z
             coord: Values of the selected coordinate
             tol (optional): Optional. Tolerance, default values is 1.e-6
 
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/op/mesh/nodesbycoords/'+str(dir)+'/'+str(coord)+'/'+str(tol)+'', None, None))
+        return des(self.nfrest('GET', '/op/mesh/nodesbycoords/'+str(dir_)+'/'+str(coord)+'/'+str(tol)+'', None, None))
     def getNodesFromGroup(self, name):
         ''' Get nodes from group
         
@@ -3555,19 +3569,19 @@ class NextFEMrest:
             Integer
         '''
         return int(self.nfrest('GET', '/section/set/color/'+qt(ID)+'', None, None))
-    def getSectionCutForce(self, groupName, loadcase, time, type):
+    def getSectionCutForce(self, groupName, loadcase, time, type_):
         ''' Get section cut force for the selected section cut, loadcase, time and DoF
         
         Args:
             groupName: Name of section cut group
             loadcase: Loadcase name
             time: For linear analysis, set as 1
-            type: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
+            type_: 1=N, 2=Vy, 3=Vz, 4=Mt, 5=My, 6=Mz
 
         Returns:
             The requested value. 0 if something went wrong.
         '''
-        return float(self.nfrest('GET', '/res/sectioncutforce/'+qt(groupName)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type)+'', None, None))
+        return float(self.nfrest('GET', '/res/sectioncutforce/'+qt(groupName)+'/'+qt(loadcase)+'/'+qt(time)+'/'+str(type_)+'', None, None))
     def getSectionFigure(self, sectionID, figureID, isHole=False):
         ''' Get points in Z-Y plane from a section figure. Typically, index 1 contains the first (filled) figure.
         
@@ -3826,21 +3840,21 @@ class NextFEMrest:
             String value
         '''
         return self.nfrest('GET', '/op/sep', None, None)
-    def getShearResFromDict(self, dict:list):
+    def getShearResFromDict(self, dict_:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
         Args:
-            dict: Dictionary of string, double of an already performed checking
+            dict_: Dictionary of string, double of an already performed checking
 
         Returns:
             An array of size 2 with VrdY and VrdZ
         '''
         return des(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
-    def getShearResFromDict(self, dict:list):
+    def getShearResFromDict(self, dict_:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
         Args:
-            dict: Dictionary of string, double of an already performed checking
+            dict_: Dictionary of string, double of an already performed checking
 
         Returns:
             An array of size 2 with VrdY and VrdZ
@@ -4146,18 +4160,18 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/opensees', None, dict([("path",path)])))
-    def importOpenSeesRecorder(self, path, type, useTimeFlag=True):
+    def importOpenSeesRecorder(self, path, type_, useTimeFlag=True):
         ''' Import an OpenSees recorder text file. XML is also supported.
         
         Args:
             path: Full path of results file
-            type: Type of result: 1-displacements 2-reactions 3-eigenvectors 4-accelerations 5-forces
+            type_: Type of result: 1-displacements 2-reactions 3-eigenvectors 4-accelerations 5-forces
             useTimeFlag (optional): Set to true if -time flag has been used in the recorder setting
 
         Returns:
             Boolean
         '''
-        return sbool(self.nfrest('GET', '/op/import/recorder/'+str(type)+'/'+str(useTimeFlag)+'', None, dict([("path",path)])))
+        return sbool(self.nfrest('GET', '/op/import/recorder/'+str(type_)+'/'+str(useTimeFlag)+'', None, dict([("path",path)])))
     def importSAF(self, path):
         ''' Import structural model in SAF file
         
@@ -4605,7 +4619,21 @@ class NextFEMrest:
         ''' Refresh view of the remote connected instance of NextFEM Designer. Valid only after connect() command.
         
         Args:
-            vstate (optional): Optional. Int value from ViewState enumerator, default is Reset (0). (1) NoOperation, (2) NodesVisible, (3) NodesNumber, (4) ElementsNumber, etc.
+            vstate (optional): Optional. Int value from ViewState enumerator, default is Reset (0): (0) Reset, (1) NoOperation, 
+ (2) NodesVisible, (3) NodesNumber, (4) ElementsNumber, (5) ExtrudedView, (6) ColorElements_Uniform, (7) ColorElements_BySection, 
+ (8) ColorElements_ByMaterial, (9) ColorElements_ByGroup, (10) ShowLocalAxes, (11) GetScreenshot, (12) ShowAllLoads, 
+ (13) ShowDisplResults, (14) HighlightSelectedNodes, (15) HighlightSelectedElems, (16) ClearNodesHighlight, 
+ (17) ClearElementsHighlight, (18) ShowNodesCheckResults, (19) ShowElementsCheckResults, (20) ShowFrameForcesResults, 
+ (21) ShowFrameForcesResultsN, (22) ShowFrameForcesResultsVy, (23) ShowFrameForcesResultsVz, (24) ShowFrameForcesResultsT, 
+ (25) ShowFrameForcesResultsMy, (26) ShowFrameForcesResultsMz, (27) ShowReactionsResults, (28) ShowReactionsResultsRX, 
+ (29) ShowReactionsResultsRY, (30) ShowReactionsResultsRZ, (31) ShowReactionsResultsRrX, (32) ShowReactionsResultsRrY, 
+ (33) ShowReactionsResultsRrZ, (34) ShowAreaForcesResults, (35) ShowAreaForcesResultsFxx, (36) ShowAreaForcesResultsFyy, 
+ (37) ShowAreaForcesResultsFxy, (38) ShowAreaForcesResultsMxx, (39) ShowAreaForcesResultsMyy, 
+ (40) ShowAreaForcesResultsMxy, (41) ShowAreaForcesResultsQxz, (42) ShowAreaForcesResultsQyz, 
+ (43) ShowAreaForcesResultsMxWAbot, (44) ShowAreaForcesResultsMyWAbot, (45) ShowAreaForcesResultsMxWAtop, 
+ (46) ShowAreaForcesResultsMyWAtop, (47) ShowAreaForcesResultsMxWA, (48) ShowAreaForcesResultsMyWA, 
+ (49) ShowSoilPressure, (50) ApplyColors, (51) ShowSelectionOnly, (52) HideSelection, (53) ShowAll, (54) FitView, 
+ (55) UserView
             resize (optional): Optional, default to false (no view resize)
 
         Returns:
@@ -5193,32 +5221,32 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/loadcase/setbuck/'+qt(name)+'/'+str(Nmodes)+'/'+str(tol)+'', None, None))
-    def setCombination(self, name, loadcase, factor, type=0, servType=0):
+    def setCombination(self, name, loadcase, factor, type_=0, servType=0):
         ''' Set a linear add combination from an existing loadcase. It can be called multiple times. If the loadcase is already in combination, change its factor.
         
         Args:
             name: Name of the loadcase to transform into a combination, or target combination
             loadcase: Name of the loadcase to add to the combination
             factor: Factor for the loadcase to add to the combination
-            type (optional): Set the combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
+            type_ (optional): Set the combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
             servType (optional): Set the combination type for checking: 0 (default) unknown, 1 characteristic, 2 frequent, 3 quasi-permanent
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/loadcase/combo/set/'+qt(name)+'/'+qt(loadcase)+'/'+str(factor)+'/'+str(type)+'/'+str(servType)+'', None, None))
-    def setCombinationCoeffPsi(self, subscript, type, value):
+        return sbool(self.nfrest('GET', '/loadcase/combo/set/'+qt(name)+'/'+qt(loadcase)+'/'+str(factor)+'/'+str(type_)+'/'+str(servType)+'', None, None))
+    def setCombinationCoeffPsi(self, subscript, type_, value):
         ''' Set the psi combination coefficient to the desired value
         
         Args:
             subscript: 0 for psi0, 1 for psi1, 2 for psi2
-            type: 1 for variable loading, 2 for wind loads, 3 for snow loading
+            type_: 1 for variable loading, 2 for wind loads, 3 for snow loading
             value: Desired psi value
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/loadcase/setpsi/'+str(subscript)+'/'+str(type)+'/'+str(value)+'', None, None))
+        return sbool(self.nfrest('GET', '/loadcase/setpsi/'+str(subscript)+'/'+str(type_)+'/'+str(value)+'', None, None))
     def setCombinationFactors(self, gG, gQ, psiVar:list=None, psiWind:list=None, psiSnow:list=None, gSW=0):
         ''' Set or change combination factors
         
@@ -5361,20 +5389,20 @@ class NextFEMrest:
             True if successful, False if the cannot be assigned. End releases cannot be assigned to beams with flexural hinges.
         '''
         return sbool(self.nfrest('POST', '/element/beamendrelease/'+qt(beamID)+'/'+qt(node)+'/'+str(useStiffness)+'', None, dict([("DOFmask",json.dumps(DOFmask))])))
-    def setEnvelope(self, name, loadcase, factor, type=0, servType=0):
+    def setEnvelope(self, name, loadcase, factor, type_=0, servType=0):
         ''' Set an envelope combination from an existing loadcase. It can be called multiple times. If the loadcase is already in combination, change its factor.
         
         Args:
             name: Name of the loadcase to transform into a combination, or target combination
             loadcase: Name of the loadcase to add to the combination
             factor: Factor for the loadcase to add to the combination
-            type (optional): Set the combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
+            type_ (optional): Set the combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
             servType (optional): Set the serviceability combination type for checking: 0 (default) unknown, 1 characteristic, 2 frequent, 3 quasi-permanent
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/loadcase/combo/setenv/'+qt(name)+'/'+qt(loadcase)+'/'+str(factor)+'/'+str(type)+'/'+str(servType)+'', None, None))
+        return sbool(self.nfrest('GET', '/loadcase/combo/setenv/'+qt(name)+'/'+qt(loadcase)+'/'+str(factor)+'/'+str(type_)+'/'+str(servType)+'', None, None))
     def setFiberSection(self, ID, divZ=0, divY=0):
         ''' Make the selected section a fiber section. Suitable only for OpenSees solver.
         
@@ -5472,17 +5500,17 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/loadcase/combo/setphase/'+qt(name)+'/'+qt(loadcase)+'/'+str(phase)+'', None, None))
-    def setLoadCaseType(self, name, type):
+    def setLoadCaseType(self, name, type_):
         ''' Set loadcase type
         
         Args:
             name: Name of the loadcase
-            type: Integer type: 0 Dead, 1 Live, 2 Wind, 3 Snow, 4 User, 5 Quake, 6 unknown, 7 Thermal, 8 Prestress
+            type_: Integer type: 0 Dead, 1 Live, 2 Wind, 3 Snow, 4 User, 5 Quake, 6 unknown, 7 Thermal, 8 Prestress
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/loadcase/settype/'+qt(name)+'/'+str(type)+'', None, None))
+        return sbool(self.nfrest('GET', '/loadcase/settype/'+qt(name)+'/'+str(type_)+'', None, None))
     def setLoadDurationClass(self, loadcase, durationClass):
         ''' Set the load duration class for the selected loadcase
         
@@ -5858,20 +5886,20 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/springproperty/axes/'+qt(name)+'/'+str(x1)+'/'+str(y1)+'/'+str(z1)+'/'+str(x2)+'/'+str(y2)+'/'+str(z2)+'', None, None))
-    def setSRSScombination(self, name, loadcase, factor, type=0, servType=0):
+    def setSRSScombination(self, name, loadcase, factor, type_=0, servType=0):
         ''' Set a linear add combination from an existing loadcase. It can be called multiple times.
         
         Args:
             name: Name of the loadcase to transform into a combination, or target combination
             loadcase: Name of the loadcase to add to the combination
             factor: Factor for the loadcase to add to the combination
-            type (optional): Set the combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
+            type_ (optional): Set the combination type for checking: 0 (default) unknown, 1 ultimate, 2 serviceability, 3 seismic
             servType (optional): Set the combination type for checking: 0 (default) unknown, 1 characteristic, 2 frequent, 3 quasi-permanent
 
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/loadcase/combo/setsrss/'+qt(name)+'/'+qt(loadcase)+'/'+str(factor)+'/'+str(type)+'/'+str(servType)+'', None, None))
+        return sbool(self.nfrest('GET', '/loadcase/combo/setsrss/'+qt(name)+'/'+qt(loadcase)+'/'+str(factor)+'/'+str(type_)+'/'+str(servType)+'', None, None))
     def setSteelSection(self, ID, SectionClass=3, alphaLT=0.76, alphay=0.76, alphaz=0.76, Jw=0):
         ''' Set steel checking parameters for section
         

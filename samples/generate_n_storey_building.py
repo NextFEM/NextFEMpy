@@ -40,20 +40,18 @@ nlx = len(lx)
 nly = len(ly)
 nlz = len(lz)
 
-import numpy as np
-
 # Coords x
-x = np.zeros(nlx + 1)
+x = [0.0] * (nlx + 1)
 for i in range(1, nlx + 1):
     x[i] = x[i-1] + lx[i-1]
 
 # Coords y
-y = np.zeros(nly + 1)
+y = [0.0] * (nly + 1)
 for j in range(1, nly + 1):
     y[j] = y[j-1] + ly[j-1]
 
 # Coords z
-z = np.zeros(nlz + 1)
+z = [0.0] * (nlz + 1)
 for k in range(1, nlz + 1):
     z[k] = z[k-1] + lz[k-1]
 
