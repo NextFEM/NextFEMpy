@@ -5634,7 +5634,7 @@ class NextFEMrest:
         Returns:
             Boolean value
         '''
-        return sbool(self.nfrest('POST', '/node'+qt(ID)+'', coords, None))
+        return sbool(self.nfrest('POST', '/node/'+qt(ID)+'', coords, None))
     def setNodeCS(self, num, x1, y1, z1, x2, y2, z2):
         ''' Set the Local Coordinate System of a node by specifying the first 2 vectors.
         
