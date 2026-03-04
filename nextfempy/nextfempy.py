@@ -2607,6 +2607,16 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/designmaterials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type_)+'', None, None))
+    def getDesMaterialLibNames(self, subproduct=''):
+        ''' Return an array of string containing design material library names from built-in library.
+        
+        Args:
+            subproduct (optional): Optional. String specifying the subproduct for filtering design material libraries
+
+        Returns:
+            Array of strings
+        '''
+        return des(self.nfrest('GET', '/designmaterials/libraries/'+qt(subproduct)+'', None, None))
     def getDocXheadings(self):
         ''' Get a list of headings contained in the current DocX document.
         
@@ -2986,7 +2996,7 @@ class NextFEMrest:
         '''
         return des(self.nfrest('GET', '/op/sectioncalc/momentcurvaturedata', None, None))
     def getLastRunLog(self):
-        ''' Get log for the last run analysis
+        ''' Get analysis log for the last run
         
         
         Returns:
@@ -3188,6 +3198,14 @@ class NextFEMrest:
             Line=0, Line3=1, Quad1=2, Quad2=3, Quad3=4, masonryWall=5, rigidWall=6, -1 if not assigned
         '''
         return int(self.nfrest('GET', '/element/macro/'+qt(elemID)+'', None, None))
+    def getMaterialLibNames(self):
+        ''' Return an array of string containing material library names from built-in library.
+        
+        
+        Returns:
+            Array of strings
+        '''
+        return des(self.nfrest('GET', '/materials/libraries', None, None))
     def getMaterialProperty(self, ID, name, units=None):
         ''' Return selected property from a material
         
@@ -3613,6 +3631,14 @@ class NextFEMrest:
             Array of bytes
         '''
         return self.nfrestB('GET', '/op/sectioncalc/imageB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None)
+    def getSectionLibNames(self):
+        ''' Return an array of string containing section library names from built-in library.
+        
+        
+        Returns:
+            Array of strings
+        '''
+        return des(self.nfrest('GET', '/sections/libraries', None, None))
     def getSectionOffset(self, ID):
         ''' Get the section offset for selected beam element
         
@@ -3782,7 +3808,7 @@ class NextFEMrest:
         
         Args:
             sectionID: ID of the section
-            verName: Name of the checking to be used
+            verName: Name of the checking to be used. See getCheckNameByMaterial to get it automatically
             N (optional): Optional. Axial force. Positive for tension
             Mzz (optional): Optional. Moment around vertical section axis
             Myy (optional): Optional. Moment around horizontal section axis
