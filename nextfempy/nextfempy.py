@@ -2595,7 +2595,7 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/designmaterials/library/'+qt(filter)+'/'+str(type_)+'', None, None))
-    def getDesignMaterialsLibrary(self, filename, filter='', type_=0):
+    def getDesignMaterialsLibraryF(self, filename, filter='', type_=0):
         ''' Return an array of string containing design material names from built-in library.
         
         Args:
@@ -3229,7 +3229,7 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/materials/library/'+qt(filter)+'/'+str(type_)+'', None, None))
-    def getMaterialsLibrary(self, filename, filter='', type_=0):
+    def getMaterialsLibraryF(self, filename, filter='', type_=0):
         ''' Return an array of string containing material names from built-in library.
         
         Args:
@@ -3830,7 +3830,7 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/sections/library/'+qt(filter)+'', None, None))
-    def getSectionsLibrary(self, filename, filter=''):
+    def getSectionsLibraryF(self, filename, filter=''):
         ''' Return an array of string containing section names from built-in library.
         
         Args:
@@ -5976,6 +5976,14 @@ class NextFEMrest:
             
         '''
         return sbool(self.nfrest('GET', '/op/showvieport/'+qt(path)+'/'+str(width)+'/'+str(height)+'', None, None))
+    def splitElementsByRebarSegments(self):
+        ''' Split element in segments according to rebar distribution. It is necessary to include all rebar segments in fiber analysis.  Effective only on Line elements.
+        
+        
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/section/rebar/splitsegments', None, None))
     def userCheck(self, verName, overrideValues:list=None):
         ''' Run checking on user script. No node or element quantities are given. See also getItemDataResults method.
         
