@@ -48,9 +48,9 @@ class vert3:
         }
 
 class NextFEMrest:
-    headers = {}
 
     def __init__(self,_baseUrl=None,_user="",_msg=True):
+        self.headers = {}
         if _baseUrl is None:
             self.baseUrl="http://localhost:5151"
         else:
@@ -1935,6 +1935,17 @@ class NextFEMrest:
             True if operations goes fine.
         '''
         return sbool(self.nfrest('GET', '/res/delchecks', None, None))
+    def deleteDocXheadingByTitle(self, titles:list, useLast=False):
+        ''' Remove the paragraphs contained in the specified titles
+        
+        Args:
+            titles: Array of paragraph titles to be deleted
+            useLast (optional): If true, in case of multiple paragraphs with the same title, only the last one is deleted. Default is false, the first paragraph with the specified titles is deleted
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('POST', '/op/docx/delheadingsbytitle/'+str(useLast)+'', titles, None))
     def deleteDocXheadings(self, headingsIDtoDelete:list):
         ''' Remove the paragraphs contained in the specified titles
         
@@ -2719,6 +2730,17 @@ class NextFEMrest:
             The requested value as string. Empty in case of error
         '''
         return self.nfrest('GET', '/element/prop/'+qt(ID)+'/'+qt(name)+'', None, None)
+    def getElementRebarCoords(self, elem, progr):
+        ''' Get rebar coordinates from selected element
+        
+        Args:
+            elem: ID of the element or group name
+            progr: Progressive abscissa (relative value from 0 to 1)
+
+        Returns:
+            Array of X,Y coordinates of size (rebarNumber,2). Coordinates are always referred to the center of reinforcement
+        '''
+        return des(self.nfrest('GET', '/element/rebar/coords/'+qt(elem)+'/'+str(progr)+'', None, None))
     def getElementRebarSegments(self, elem):
         ''' Get rebar segments with their initial and final position, in percentage of element length
         
@@ -2729,6 +2751,17 @@ class NextFEMrest:
             An array of double with {Linital, Lfinal} for each segment. The number of segment is the lenght of the array divided by 2
         '''
         return des(self.nfrest('GET', '/section/rebar/segments/'+qt(elem)+'', None, None))
+    def getElementRebarSize(self, elem, progr):
+        ''' Get rebar dimensions from selected element
+        
+        Args:
+            elem: ID of the element or group name
+            progr: Progressive abscissa (relative value from 0 to 1)
+
+        Returns:
+            
+        '''
+        return des(self.nfrest('GET', '/element/rebar/size/'+qt(elem)+'/'+str(progr)+'', None, None))
     def getElementsChecks(self, lc, time):
         ''' Get the checks stored in the model for elements
         
@@ -3687,7 +3720,7 @@ class NextFEMrest:
             ID: ID of the section
 
         Returns:
-            Array of dimensions of size (rebarNumber,2). All values in mm. Each item starts with Dd with d the diameter for bars, base x height @ rotation for rectangular reinforcements
+            Array of size of rebar number. All values in mm. Each item starts with Dd with d the diameter for bars, base x height @ rotation for rectangular reinforcements
         '''
         return des(self.nfrest('GET', '/section/rebar/size/'+qt(ID)+'', None, None))
     def getSectionResDomainPoints(self, domainIndex, domainType, cleanResponseTolerance=0):
@@ -5209,7 +5242,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/loadcase/sequence/'+qt(name)+'/'+qt(previousCase)+'', None, None))
     def setBC(self, node, x, y, z, rx, ry, rz):
-        ''' Set the boundary conditions (restraints) for a node
+        ''' Set or change the boundary conditions (restraints) for a node
         
         Args:
             node: Node to be restrained
@@ -5651,7 +5684,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/res/import/nodecheck/'+qt(ID)+'/'+qt(lc)+'/'+qt(time)+'/'+str(setContour)+'', None, dict([("data",data)])))
     def setNodeCoordinates(self, ID, coords:list):
-        ''' Set node coordinates as double array
+        ''' Set or change node coordinates as double array
         
         Args:
             ID: ID of the node
@@ -5698,6 +5731,28 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/loadcase/setpdelta/'+qt(name)+'/'+str(tol)+'', None, None))
+    def setPlaneStrainElement(self, id_, isPlaneStrain):
+        ''' Set plane strain condition to a planar element. This method has effect only on planar elements and it is ignored for other types of elements.
+        
+        Args:
+            id_: 
+            isPlaneStrain: 
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('GET', '/element/planestrain/'+qt(id_)+'/'+str(isPlaneStrain)+'', None, None))
+    def setPlaneStressElement(self, id_, isPlaneStress):
+        ''' Set plane stress condition to a planar element. This method has effect only on planar elements and it is ignored for other types of elements.
+        
+        Args:
+            id_: 
+            isPlaneStress: 
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('GET', '/element/planestress/'+qt(id_)+'/'+str(isPlaneStress)+'', None, None))
     def setResponseSpectrumAnalysis(self, direction, loadcase, modesNumber, spectrumFuncID, modalDamping=0.05, factor=1):
         ''' Set a Response Spectrum analysis on an existing loadcase
         
