@@ -5471,7 +5471,7 @@ class NextFEMrest:
             divY (optional): Division in Y direction
 
         Returns:
-            True if successful
+            True if successful, False is section type is unknown (then use convertToMeshedSection)
         '''
         return sbool(self.nfrest('GET', '/section/set/fibers/'+str(ID)+'/'+str(divZ)+'/'+str(divY)+'', None, None))
     def setFirePoint(self, loadcase, fireNode, targetTemp, gradientY=0, gradientZ=0, tempAtten=20, dontLoadUnder=50):
@@ -6071,7 +6071,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return self.nfrest('GET', '/op/import/valfromstring/'+qt(text)+'/'+qt(valueName)+'', None, None)
+        return self.nfrest('POST', '/op/import/valfromstring/'+qt(valueName)+'', text, None)
     def vertexFromNode(self, node):
         ''' Get vertex from node for calculation with vert3 class.
         
@@ -6642,6 +6642,14 @@ class NextFEMrest:
     def springColor(self,value):
         '''   Change color for springs   '''
         self.nfrest('POST','/model/colors/spring', heads={'val':str(value)})
+    @property
+    def tableSeparator(self):
+        '''   Set or get the table separator for outputting tables and arrays   '''
+        return self.nfrest('GET','/op/opt/separator')
+    @tableSeparator.setter
+    def tableSeparator(self,value):
+        '''   Set or get the table separator for outputting tables and arrays   '''
+        self.nfrest('POST','/op/opt/separator', heads={'val':str(value)})
     @property
     def tempFolder(self):
         '''   Get or set the temporary folder.   '''
