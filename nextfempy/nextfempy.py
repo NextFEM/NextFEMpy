@@ -325,6 +325,16 @@ class NextFEMrest:
             The ID assigned to the section.
         '''
         return int(self.nfrest('GET', '/section/add/cshape/'+str(Lz)+'/'+str(Ly)+'/'+str(tw)+'/'+str(tf1)+'/'+str(tf2)+'/'+str(Lz2)+'', None, None))
+    def addCustomTranslations(self, path):
+        ''' Add custom translations to the model, from a CSV file with ";"-separated entries. The file must be encoded in UTF-8
+        
+        Args:
+            path: 
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('POST', '/op/trasl'+qt(path)+'', None, None))
     def addDCSection(self, Lz, Ly, tw, tf1, tf2, gap, Lz2=0):
         ''' Add a new beam double-C section to the model.
         
@@ -379,6 +389,23 @@ class NextFEMrest:
             The ID assigned to the section.
         '''
         return int(self.nfrest('GET', '/section/add/doublelshape/'+str(Lz)+'/'+str(Ly)+'/'+str(tw)+'/'+str(tf1)+'/'+str(gap)+'', None, None))
+    def addDrawing(self, name, elems:list, group, plane, scaleDenom, paperX, paperY, asMember=False):
+        ''' Add a drawing export to the model
+        
+        Args:
+            name: Name of the construction drawing
+            elems: List of elements to be rendered. Choose a list of elements or a group
+            group: Name of group to be rendered. Choose a list of elements or a group
+            plane: Plane applicable only when a group is selected. "XY"=0, "XZ"=1, "YZ"=2
+            scaleDenom: 
+            paperX: Size of the paper in cm. It affects layout
+            paperY: Size of the paper in cm. It affects layout
+            asMember (optional): Option applicable only when a group is selected. If active, renders the group as a member (horizontal development)
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('POST', '/model/drawing/'+qt(name)+'/'+qt(group)+'/'+str(plane)+'/'+str(scaleDenom)+'/'+str(paperX)+'/'+str(paperY)+'/'+str(asMember)+'', elems, None))
     def addDTSection(self, Lz, Ly, tw, tf1, tf2, Lz2=0):
         ''' Add a new beam double-T section to the model.
         
@@ -731,7 +758,7 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/node/add/'+str(x)+'/'+str(y)+'/'+str(z)+'/'+qt(ID)+'', None, None))
     def addNormalhinge(self, name, checkType, position, includeShear=False, includeTorsion=False, cKpl=0.001, FresRatio=0.2):
-        ''' Add a beam hinge without NVM interaction, ready to be assigned to elements. To be used typically for beams part of rigid floors
+        ''' Add a beam hinge without NVM interaction, ready to be assigned to elements. To be used typically for beams in rigid floors
         
         Args:
             name: Name of the hinge
@@ -821,6 +848,18 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/designmaterial/prop/'+str(ID)+'/'+qt(name)+'/'+qt(value)+'/'+qt(units)+'', None, None))
+    def addOrChangeElementFlag(self, ID, flag, value):
+        ''' Add or change a flag for the element. Flags are custom properties that can be used for any purpose (see elementAvailableFlags)
+        
+        Args:
+            ID: ID of the element
+            flag: Name of the flag
+            value: Value of the flag
+
+        Returns:
+            True if the flag was added or updated successfully
+        '''
+        return sbool(self.nfrest('', ''+qt(ID)+'/'+qt(flag)+'/'+qt(value)+'', None, None))
     def addOrChangeLoadCombinationsTable(self, table:list):
         ''' Add or change the load combinations table set in the model. Function needs General Design license.
         
@@ -2042,17 +2081,48 @@ class NextFEMrest:
             The ID of the newly created copy of the section
         '''
         return int(self.nfrest('GET', '/section/duplicate/'+str(originalID)+'', None, None))
-    def exportDXF(self, path, extruded):
-        ''' Export DXF of the model
+    def elementAvailableFlags(self):
+        ''' Return a dictionary of all flags that can be defined for an element, with their description
+        
+        
+        Returns:
+            Dictionary of flags and their descriptions
+        '''
+        return des(self.nfrest('', '', None, None))
+    def elementFlagList(self, ID):
+        ''' Return a dictionary of all flags defined for the element, with their value
         
         Args:
-            path: Path of the file to be saved
+            ID: ID of the element
+
+        Returns:
+            Dictionary of flags and their values
+        '''
+        return des(self.nfrest('', ''+qt(ID)+'', None, None))
+    def exportDXF(self, path, extruded, selectedElems:list=None):
+        ''' Export DXF or DWG of the model
+        
+        Args:
+            path: Path of the DXF or DWG file to be saved
             extruded: True if extruded model, false for wireframe
+            selectedElems (optional): List of string with selected elements ID. If null (default), entire model is drawed.
 
         Returns:
             
         '''
-        return sbool(self.nfrest('GET', '/op/export/dxf/'+str(extruded)+'', None, dict([("path",path)])))
+        return sbool(self.nfrest('POST', '/op/export/dxf/'+str(extruded)+'', selectedElems, dict([("path",path)])))
+    def exportElevationGroupToDXF(self, path, groupName, YZplane=False):
+        ''' Export the elevation view of selected group of elements to DXF or DWG format. Top rebars will be shown in plan, if present
+        
+        Args:
+            path: Path of the resulting DXF or DWG file
+            groupName: Name of the group containing the elments to include in the elevation view
+            YZplane (optional): Optional parameter to specify if the elevation view should be in the YZ plane
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/model/group/exportelevdxf/'+qt(groupName)+'/'+str(YZplane)+'', None, dict([("path",path)])))
     def exportGLTF(self, path, saveIFC=False):
         ''' Export the model to glTF format for web sharing.
         
@@ -2064,6 +2134,17 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/export/gltf/'+str(saveIFC)+'', None, dict([("path",path)])))
+    def exportGroupToDXF(self, path, groupName):
+        ''' Export the plan view of selected group of elements to DXF or DWG format. Top rebars will be shown in plan, if present
+        
+        Args:
+            path: Path of the resulting DXF or DWG file
+            groupName: Name of the group containing the elments to include in the plan view
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/model/group/exportdxf/'+qt(groupName)+'', None, dict([("path",path)])))
     def exportIFC(self, path, saveAsXML=False):
         ''' Export IFC file
         
@@ -2107,32 +2188,21 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/op/export/opensees/'+qt(loadcase)+'', None, dict([("path",path)])))
     def exportRCbeamsDXF(self, path, elements:list):
-        ''' Export the selected RC beam to DXF format. Rebars and hoops will be inserted in DXF, if present
+        ''' Export the selected RC beam to DXF or DWG format. Rebars and hoops will be inserted in the drawing, if present
         
         Args:
-            path: Path of the resulting DXF file
+            path: Path of the resulting DXF or DWG file
             elements: Array of elements to include in DXF
 
         Returns:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/element/exportdxf', None, dict([("path",path),("elements",json.dumps(elements))])))
-    def exportRCfloorDXF(self, path, groupName):
-        ''' Export the plan view of selected group of elements to DXF format. Top rebars will be shown in DXF plan, if present
-        
-        Args:
-            path: Path of the resulting DXF file
-            groupName: Name of the group containing the elments to include in the plan view
-
-        Returns:
-            True if successful
-        '''
-        return sbool(self.nfrest('GET', '/model/group/exportdxf/'+qt(groupName)+'', None, dict([("path",path)])))
     def exportRCmemberDXF(self, path, member):
-        ''' Export the selected RC member to DXF format. Rebars and hoops will be inserted in DXF, if present
+        ''' Export the selected RC member to DXF or DWG format. Rebars and hoops will be inserted in the drawing, if present
         
         Args:
-            path: Path of the resulting DXF file
+            path: Path of the resulting DXF or DWG file
             member: Member name
 
         Returns:
@@ -2160,10 +2230,10 @@ class NextFEMrest:
         '''
         return sbool(self.nfrest('GET', '/op/export/sap2000', None, dict([("path",path)])))
     def exportSectionDXF(self, path, sID):
-        ''' Export the selected section to DXF format. Rebars and hoops are included, if present
+        ''' Export the selected section to DXF or DWG format. Rebars and hoops are included, if present
         
         Args:
-            path: Path of the resulting DXF file
+            path: Path of the resulting DXF or DWG file
             sID: ID of the section
 
         Returns:
@@ -2636,6 +2706,16 @@ class NextFEMrest:
             List of array of strings as (ID, level, title)
         '''
         return des(self.nfrest('GET', '/op/docx/headings', None, None))
+    def getDrawing(self, name):
+        ''' Get the drawing as bytes to be saved in a DXF file
+        
+        Args:
+            name: Name of the construction drawing
+
+        Returns:
+            Array of bytes representing the DXF file
+        '''
+        return self.nfrestB('GET', '/model/drawing/'+qt(name)+'', None, None)
     def getDXFentities(self, stream):
         ''' Get drawing entities in the loaded DXF serialized in JSON format
         
@@ -3076,7 +3156,7 @@ class NextFEMrest:
         '''
         return self.nfrest('GET', '/loadcase/combo/get/'+qt(name)+'', None, None)
     def getLoad(self, i):
-        ''' Returns a string describing of the i-th load in the model.
+        ''' Returns a string describing of the i-th load in the model. Use valueFromString to extract data from line (except for Data, which reports one value per line)
         
         Args:
             i: ID of the load, starting from 0.
@@ -3274,6 +3354,14 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/materials/libraryf/'+qt(filename)+'/'+qt(filter)+'/'+str(type_)+'', None, None))
+    def getMaxElementID(self):
+        ''' Get the max free element ID
+        
+        
+        Returns:
+            Int64 value
+        '''
+        return self.nfrest('GET', '/op/maxelementid', None, None)
     def getMaxMinBeamForces(self, sectionID, type_):
         ''' Get maximum and minimum beam forces from elements having the same section, in all loadcases and all stations
         
@@ -3316,6 +3404,14 @@ class NextFEMrest:
             An array of length 2 containing max and min moments in this order: bottom dir.x, botton dir.y, top dir.x, top dir.y
         '''
         return des(self.nfrest('GET', '/res/maxminwoodarmerg/'+qt(groupName)+'', None, None))
+    def getMaxNodeID(self):
+        ''' Get the max free node ID
+        
+        
+        Returns:
+            Int64 value
+        '''
+        return self.nfrest('GET', '/op/maxnodeid', None, None)
     def getMemberElements(self, member):
         ''' Get the IDs of beam elements grouped in a member.
         
@@ -4674,6 +4770,14 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/section/recalc/'+str(ID)+'', None, None))
+    def reDo(self):
+        ''' Redo the last undone operation.
+        
+        
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/op/redo', None, None))
     def refreshDesignerView(self, vstate=0, resize=False):
         ''' Refresh view of the remote connected instance of NextFEM Designer. Valid only after connect() command.
         
@@ -4766,6 +4870,16 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('DELETE', '/designmaterial/prop/'+str(ID)+'/'+qt(name)+'', None, None))
+    def removeDrawing(self, name):
+        ''' Remove the selected drawing from the model
+        
+        Args:
+            name: Name of the construction drawing
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('DELETE', '/model/drawing/'+qt(name)+'', None, None))
     def removeElement(self, ID):
         ''' Remove the specified element from the model
         
@@ -4825,6 +4939,16 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/hinge/remove/'+qt(beamID)+'', None, None))
+    def removeHingeType(self, name):
+        ''' Remove hinge property
+        
+        Args:
+            name: Name of the hinge property
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('DELETE', '/hinge/removetype/'+qt(name)+'', None, None))
     def removeLink(self, node):
         ''' Removes a rigid link from the model.
         
@@ -5069,7 +5193,7 @@ class NextFEMrest:
         ''' Request undo to remote connected instance of NextFEM Designer. Valid only after connect() command.
         
         Args:
-            ustate (optional): Optional. Int value from UndoOps enumerator, default is Normal (0). NormalDontAsk (1), NoUndo (2).
+            ustate (optional): Optional. Int value from UndoOps enumerator, default is Normal (0), NormalDontAsk (1), NoUndo (2).
 
         Returns:
             
@@ -5140,6 +5264,16 @@ class NextFEMrest:
             HTML code as string
         '''
         return self.nfrest('POST', '/op/docx/html', pageTitle, None)
+    def saveForUndo(self, op):
+        ''' Request an undo before to continue
+        
+        Args:
+            op: Description for the operation to be done
+
+        Returns:
+            True
+        '''
+        return sbool(self.nfrest('POST', '/op/saveundo', op, None))
     def saveModel(self, filename):
         ''' Save the model and results with desired name
         
@@ -5474,7 +5608,7 @@ class NextFEMrest:
             True if successful, False is section type is unknown (then use convertToMeshedSection)
         '''
         return sbool(self.nfrest('GET', '/section/set/fibers/'+str(ID)+'/'+str(divZ)+'/'+str(divY)+'', None, None))
-    def setFirePoint(self, loadcase, fireNode, targetTemp, gradientY=0, gradientZ=0, tempAtten=20, dontLoadUnder=50):
+    def setFirePoint(self, loadcase, fireNode, targetTemp, gradientY=0, gradientZ=0, tempAtten=20, dontLoadUnder=50, normalize=False):
         ''' Set the point of fire used to set temperatures of all the elements in the model
         
         Args:
@@ -5485,11 +5619,12 @@ class NextFEMrest:
             gradientZ (optional): Fixed gradient (local z) to be applied. Optional, default is 0
             tempAtten (optional): Temperature attenuation. Optional, default is 20°C/m
             dontLoadUnder (optional): Don't apply load under this temperature. Optional, default is 50°C
+            normalize (optional): Applied temperatures normalized with respect to target temp.
 
         Returns:
             A list of loaded elements
         '''
-        return des(self.nfrest('GET', '/load/firepoint/'+qt(loadcase)+'/'+qt(fireNode)+'/'+str(targetTemp)+'/'+str(gradientY)+'/'+str(gradientZ)+'/'+str(tempAtten)+'/'+str(dontLoadUnder)+'', None, None))
+        return des(self.nfrest('GET', '/load/firepoint/'+qt(loadcase)+'/'+qt(fireNode)+'/'+str(targetTemp)+'/'+str(gradientY)+'/'+str(gradientZ)+'/'+str(tempAtten)+'/'+str(dontLoadUnder)+'/'+str(normalize)+'', None, None))
     def setFloorLoad(self, name, loadcase, loadvalue, dirX, dirY, dirZ):
         ''' Add or modify floor load type
         
@@ -6039,6 +6174,14 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/section/rebar/splitsegments', None, None))
+    def unDo(self):
+        ''' Undo the last operation.
+        
+        
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/op/undo', None, None))
     def userCheck(self, verName, overrideValues:list=None):
         ''' Run checking on user script. No node or element quantities are given. See also getItemDataResults method.
         
@@ -6224,11 +6367,11 @@ class NextFEMrest:
         self.nfrest('POST','/res/donotdelete', heads={'val':str(value)})
     @property
     def DXFoptions(self):
-        '''   Get or set a JSON string containing options for DXF export of RC beams and members   '''
+        '''   Get or set a JSON string containing options for drawing export of RC beams and members   '''
         return self.nfrest('GET','/op/opt/dxfoptions')
     @DXFoptions.setter
     def DXFoptions(self,value):
-        '''   Get or set a JSON string containing options for DXF export of RC beams and members   '''
+        '''   Get or set a JSON string containing options for drawing export of RC beams and members   '''
         self.nfrest('POST','/op/opt/dxfoptions', heads={'val':str(value)})
     @property
     def elemsList(self)->list:
