@@ -1832,7 +1832,7 @@ class NextFEMrest:
         Returns:
             True is successful
         '''
-        return sbool(self.nfrest('GET', '/section/rebar/clear/'+qt(ID)+'', None, None))
+        return sbool(self.nfrest('GET', '/section/rebar/clear/'+str(ID)+'', None, None))
     def clearSectionRebar(self, ID):
         ''' Clear all section rebar
         
@@ -1842,7 +1842,7 @@ class NextFEMrest:
         Returns:
             True is successful
         '''
-        return sbool(self.nfrest('GET', '/section/rebar/clear/'+str(ID)+'', None, None))
+        return sbool(self.nfrest('GET', '/section/rebar/clear/'+qt(ID)+'', None, None))
     def clearSelection(self):
         ''' Clear selected items. REST version only against local instance of NextFEM Designer
         
@@ -2716,16 +2716,16 @@ class NextFEMrest:
             Array of bytes representing the DXF file
         '''
         return self.nfrestB('GET', '/model/drawing/'+qt(name)+'', None, None)
-    def getDXFentities(self, stream):
+    def getDXFentities(self, buffer:list):
         ''' Get drawing entities in the loaded DXF serialized in JSON format
         
         Args:
-            stream: Stream to be imported
+            buffer: Byte array to be imported
 
         Returns:
             String in JSON format
         '''
-        return self.nfrest('POST', '/op/import/dxfentities', stream, None)
+        return self.nfrest('POST', '/op/import/dxfentities', buffer, None)
     def getElementArea(self, ID):
         ''' Get element area of planar elements or surface for solids
         
@@ -4193,16 +4193,16 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/dxf', None, dict([("path",path)])))
-    def importDXF(self, stream):
-        ''' Import DXF from stream
+    def importDXF(self, buffer:list):
+        ''' Import DXF from bytes
         
         Args:
-            stream: Stream to be imported
+            buffer: Byte array to be imported
 
         Returns:
             Boolean
         '''
-        return sbool(self.nfrest('POST', '/op/import/dxfstream', stream, None))
+        return sbool(self.nfrest('POST', '/op/import/dxfstream', buffer, None))
     def importGMesh(self, path):
         ''' Import a text GMesh v2 file
         
@@ -5145,17 +5145,17 @@ class NextFEMrest:
             Boolean value
         '''
         return sbool(self.nfrest('GET', '/section/rename/'+str(sectionID)+'/'+qt(name)+'/'+qt(code)+'', None, None))
-    def renumberElements(self, initialID, step):
+    def renumberElements(self, initialID, step_):
         ''' Renumber elements in the model
         
         Args:
             initialID: ID for 1st element, must be > 0
-            step: Increment in numbering
+            step_: Increment in numbering
 
         Returns:
             True if renumbering has been applied, false otherwise
         '''
-        return sbool(self.nfrest('GET', '/op/mesh/renumber/elements/'+str(initialID)+'/'+str(step)+'', None, None))
+        return sbool(self.nfrest('GET', '/op/mesh/renumber/elements/'+str(initialID)+'/'+str(step_)+'', None, None))
     def renumberElementsByCoordinates(self, dir1, dir2):
         ''' Renumber elements in the model with spatial criteria, using element centroid
         
@@ -5167,17 +5167,17 @@ class NextFEMrest:
             True if renumbering has been applied, false otherwise
         '''
         return sbool(self.nfrest('GET', '/op/mesh/renumber/elementsbycoords/'+str(dir1)+'/'+str(dir2)+'', None, None))
-    def renumberNodes(self, initialID, step):
+    def renumberNodes(self, initialID, step_):
         ''' Renumber nodes in the model
         
         Args:
             initialID: ID for 1st node, must be > 0
-            step: Increment in numbering
+            step_: Increment in numbering
 
         Returns:
             True if renumbering has been applied, false otherwise
         '''
-        return sbool(self.nfrest('GET', '/op/mesh/renumber/nodes/'+str(initialID)+'/'+str(step)+'', None, None))
+        return sbool(self.nfrest('GET', '/op/mesh/renumber/nodes/'+str(initialID)+'/'+str(step_)+'', None, None))
     def renumberNodesByCoordinates(self, dir1, dir2):
         ''' Renumber nodes in the model with spatial criteria
         
@@ -5608,7 +5608,7 @@ class NextFEMrest:
             True if successful, False is section type is unknown (then use convertToMeshedSection)
         '''
         return sbool(self.nfrest('GET', '/section/set/fibers/'+str(ID)+'/'+str(divZ)+'/'+str(divY)+'', None, None))
-    def setFirePoint(self, loadcase, fireNode, targetTemp, gradientY=0, gradientZ=0, tempAtten=20, dontLoadUnder=50, normalize=False):
+    def setFirePoint(self, loadcase, fireNode, targetTemp, gradientY=0, gradientZ=0, tempAtten=20, dontLoadUnder=50, normalize=False, cylindricalXY=False):
         ''' Set the point of fire used to set temperatures of all the elements in the model
         
         Args:
@@ -5620,11 +5620,12 @@ class NextFEMrest:
             tempAtten (optional): Temperature attenuation. Optional, default is 20°C/m
             dontLoadUnder (optional): Don't apply load under this temperature. Optional, default is 50°C
             normalize (optional): Applied temperatures normalized with respect to target temp.
+            cylindricalXY (optional): Use cylindrical XY attenuation. Optional, default is False
 
         Returns:
             A list of loaded elements
         '''
-        return des(self.nfrest('GET', '/load/firepoint/'+qt(loadcase)+'/'+qt(fireNode)+'/'+str(targetTemp)+'/'+str(gradientY)+'/'+str(gradientZ)+'/'+str(tempAtten)+'/'+str(dontLoadUnder)+'/'+str(normalize)+'', None, None))
+        return des(self.nfrest('GET', '/load/firepoint/'+qt(loadcase)+'/'+qt(fireNode)+'/'+str(targetTemp)+'/'+str(gradientY)+'/'+str(gradientZ)+'/'+str(tempAtten)+'/'+str(dontLoadUnder)+'/'+str(normalize)+'/'+str(cylindricalXY)+'', None, None))
     def setFloorLoad(self, name, loadcase, loadvalue, dirX, dirY, dirZ):
         ''' Add or modify floor load type
         
