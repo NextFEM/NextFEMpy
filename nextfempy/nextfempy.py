@@ -174,7 +174,8 @@ class NextFEMrest:
             List of files
         '''
         try:
-            return des(self.nfrest('GET', '/op/userfiles', None, None))
+            result = des(self.nfrest('GET', '/op/userfiles', None, None))
+            return result if isinstance(result, list) else []
         except Exception as e:
             return ["User not logged-in"]
 
@@ -1832,7 +1833,7 @@ class NextFEMrest:
         Returns:
             True is successful
         '''
-        return sbool(self.nfrest('GET', '/section/rebar/clear/'+str(ID)+'', None, None))
+        return sbool(self.nfrest('GET', '/section/rebar/clear/'+qt(ID)+'', None, None))
     def clearSectionRebar(self, ID):
         ''' Clear all section rebar
         
@@ -1842,7 +1843,7 @@ class NextFEMrest:
         Returns:
             True is successful
         '''
-        return sbool(self.nfrest('GET', '/section/rebar/clear/'+qt(ID)+'', None, None))
+        return sbool(self.nfrest('GET', '/section/rebar/clear/'+str(ID)+'', None, None))
     def clearSelection(self):
         ''' Clear selected items. REST version only against local instance of NextFEM Designer
         
@@ -3987,6 +3988,14 @@ class NextFEMrest:
             A list of arrays of double (size 2) with resisting moment vs. curvature (1/units of length)
         '''
         return des(self.nfrest('GET', '/op/sectioncalc/momentcurvature/'+str(sectionID)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(npts)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, None))
+    def getSelfWeight(self):
+        ''' Get the loadcase name hosting self-weight
+        
+        
+        Returns:
+            
+        '''
+        return self.nfrest('GET', '/load/getsw', None, None)
     def getSeparator(self):
         ''' Returns separator used by the program
         
@@ -6438,10 +6447,6 @@ class NextFEMrest:
     def lineColor(self,value):
         '''   Change color for lines   '''
         self.nfrest('POST','/model/colors/line', heads={'val':str(value)})
-    @property
-    def loading(self):
-        '''   Readonly property for API loading   '''
-        return sbool(self.nfrest('GET',''))
     @property
     def massColor(self):
         '''   Change color for mass   '''
