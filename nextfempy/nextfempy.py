@@ -601,22 +601,6 @@ class NextFEMrest:
         Returns:
             Bar is added if area is bigger of the eventual bar in the same position. To avoid this, clear rebar prior to use this command
         '''
-        return sbool(self.nfrest('GET', '/section/rebar/long/'+qt(sectionID)+'/'+str(X)+'/'+str(Y)+'/'+str(area)+'/'+str(matID)+'/'+str(rectBase)+'/'+str(strandTens)+'', None, None))
-    def addLongitRebarInSection(self, sectionID, X, Y, area, matID, rectBase=0, strandTens=0):
-        ''' Add a longitudinal bar to a section
-        
-        Args:
-            sectionID: ID of the section
-            X: X coordinate in transversal section
-            Y: Y coordinate in transversal section
-            area: Area of the rebar
-            matID: ID of the associated design material
-            rectBase (optional): Optional. Rectangular width if layer is added instead of bar
-            strandTens (optional): Optional. Tension for strand
-
-        Returns:
-            Bar is added if area is bigger of the eventual bar in the same position. To avoid this, clear rebar prior to use this command
-        '''
         return sbool(self.nfrest('GET', '/section/rebar/long/'+str(sectionID)+'/'+str(X)+'/'+str(Y)+'/'+str(area)+'/'+str(matID)+'/'+str(rectBase)+'/'+str(strandTens)+'', None, None))
     def addLSection(self, Lz, Ly, tw, tf1):
         ''' Add a new beam L section to the model.
@@ -1025,16 +1009,6 @@ class NextFEMrest:
             The ID assigned to the section.
         '''
         return int(self.nfrest('GET', '/section/add/rect/'+str(Lz)+'/'+str(Ly)+'', None, None))
-    def addSectFromLib(self, name):
-        ''' Add a section from library
-        
-        Args:
-            name: Name of the section
-
-        Returns:
-            ID of the added section, 0 if not found
-        '''
-        return int(self.nfrest('POST', '/section/add/fromlib', name, None))
     def addSectFromLib(self, name, doNotCenter=False):
         ''' Add a section from library
         
@@ -1833,16 +1807,6 @@ class NextFEMrest:
         Returns:
             True is successful
         '''
-        return sbool(self.nfrest('GET', '/section/rebar/clear/'+qt(ID)+'', None, None))
-    def clearSectionRebar(self, ID):
-        ''' Clear all section rebar
-        
-        Args:
-            ID: ID of the section
-
-        Returns:
-            True is successful
-        '''
         return sbool(self.nfrest('GET', '/section/rebar/clear/'+str(ID)+'', None, None))
     def clearSelection(self):
         ''' Clear selected items. REST version only against local instance of NextFEM Designer
@@ -1903,7 +1867,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return self.nfrest('GET', '/units/convertunits/'+qt(length)+'/'+qt(force)+'', None, None)
+        return sbool(self.nfrest('GET', '/units/convertunits/'+qt(length)+'/'+qt(force)+'', None, None))
     def convertValue(self, value, OldUnits, NewUnits):
         ''' Convert units of a value.
         
@@ -2747,13 +2711,13 @@ class NextFEMrest:
             A double array
         '''
         return des(self.nfrest('GET', '/element/centroid/'+qt(ID)+'', None, None))
-    def getElementChecks(self, ID, lc, time):
-        ''' Get the checks stored in the model for the specified element
+    def getElementChecks(self, ID, lc, time='1'):
+        ''' Get the checks stored in the model for the specified element. Values returned are the ratios in the Verification table
         
         Args:
             ID: ID of the element
             lc: Name of the loadcase
-            time: Time
+            time (optional): Time
 
         Returns:
             Null if no checking are available
@@ -2843,12 +2807,12 @@ class NextFEMrest:
             
         '''
         return des(self.nfrest('GET', '/element/rebar/size/'+qt(elem)+'/'+str(progr)+'', None, None))
-    def getElementsChecks(self, lc, time):
+    def getElementsChecks(self, lc, time='1'):
         ''' Get the checks stored in the model for elements
         
         Args:
             lc: Name of the loadcase
-            time: Time
+            time (optional): Time
 
         Returns:
             Null if no checking are available
@@ -2894,6 +2858,20 @@ class NextFEMrest:
             
         '''
         return float(self.nfrest('GET', '/element/volume/'+qt(ID)+'', None, None))
+    def getElemIDsByProperty(self, matID='', sectID='', Etype=0, sprProp='', macroElem=''):
+        ''' Get a list of element IDs with the specified material, section, element type, spring property or macroelement
+        
+        Args:
+            matID (optional): Material ID
+            sectID (optional): Section ID
+            Etype (optional): Element type: 1 line, 2 tria, 3 quad, 4 hexa, 5 wedge, 6 tetra, spring 40, 20 line3, 21 quad8, 23 hexa20, 24 tetra10, 25 tria6, 26 wedge15
+            sprProp (optional): Name of spring property from getSpringProperties()
+            macroElem (optional): Name of the macroelement associated from getMacroelements()
+
+        Returns:
+            IDs of filtered elements
+        '''
+        return des(self.nfrest('GET', '/element/filterbyproperty/'+qt(matID)+'/'+qt(sectID)+'/'+str(Etype)+'/'+qt(sprProp)+'/'+qt(macroElem)+'', None, None))
     def getEndRelease(self, beamID):
         ''' Give beam releases ratios. If 0, the dof is completely released.
         
@@ -3312,6 +3290,14 @@ class NextFEMrest:
             Line=0, Line3=1, Quad1=2, Quad2=3, Quad3=4, masonryWall=5, rigidWall=6, -1 if not assigned
         '''
         return int(self.nfrest('GET', '/element/macro/'+qt(elemID)+'', None, None))
+    def getMacroelements(self):
+        ''' Get the list of available macroelements
+        
+        
+        Returns:
+            Names of available macroelements
+        '''
+        return des(self.nfrest('GET', '/element/macros', None, None))
     def getMaterialLibNames(self):
         ''' Return an array of string containing material library names from built-in library.
         
@@ -3385,16 +3371,6 @@ class NextFEMrest:
             
         '''
         return des(self.nfrest('POST', '/res/maxmindispl/'+str(dir_)+'', nodes, None))
-    def getMaxMinWoodArmerMoments(self, elementID):
-        ''' Get maximum and minimun Wood-Armer moments from elements in the same group of the selected element
-        
-        Args:
-            elementID: One element in wall or slab group
-
-        Returns:
-            An array of length 2 containing max and min moments in this order: bottom dir.x, botton dir.y, top dir.x, top dir.y
-        '''
-        return des(self.nfrest('GET', '/res/maxminwoodarmer/'+str(elementID)+'', None, None))
     def getMaxMinWoodArmerMoments(self, groupName):
         ''' Get maximum and minimun Wood-Armer moments from elements in the same group of the selected element
         
@@ -3405,6 +3381,16 @@ class NextFEMrest:
             An array of length 2 containing max and min moments in this order: bottom dir.x, botton dir.y, top dir.x, top dir.y
         '''
         return des(self.nfrest('GET', '/res/maxminwoodarmerg/'+qt(groupName)+'', None, None))
+    def getMaxMinWoodArmerMomentsByElem(self, elementID):
+        ''' Get maximum and minimun Wood-Armer moments from elements in the same group of the selected element
+        
+        Args:
+            elementID: One element in wall or slab group
+
+        Returns:
+            An array of length 2 containing max and min moments in this order: bottom dir.x, botton dir.y, top dir.x, top dir.y
+        '''
+        return des(self.nfrest('GET', '/res/maxminwoodarmer/'+str(elementID)+'', None, None))
     def getMaxNodeID(self):
         ''' Get the max free node ID
         
@@ -3531,13 +3517,13 @@ class NextFEMrest:
             The requested value. 0 if something went wrong.
         '''
         return float(self.nfrest('GET', '/res/nodalstress/'+qt(num)+'/'+qt(loadcase)+'/'+qt(time)+'/'+qt(type_)+'', None, None))
-    def getNodeChecks(self, ID, lc, time):
+    def getNodeChecks(self, ID, lc, time='1'):
         ''' Get the checks stored in the model for the specified node
         
         Args:
             ID: ID of the element
             lc: Name of the loadcase
-            time: Time
+            time (optional): Time
 
         Returns:
             Null if no checking are available
@@ -3584,12 +3570,12 @@ class NextFEMrest:
             The requested value as string. Empty in case of error
         '''
         return self.nfrest('GET', '/node/prop/'+qt(ID)+'/'+qt(name)+'', None, None)
-    def getNodesChecks(self, lc, time):
+    def getNodesChecks(self, lc, time='1'):
         ''' Get the checks stored in the model for nodes
         
         Args:
             lc: Name of the loadcase
-            time: Time
+            time (optional): Time
 
         Returns:
             Null if no checking are available
@@ -3794,7 +3780,7 @@ class NextFEMrest:
         
         Args:
             ID: ID of the section
-            name: Name of the property: name, code, type, Lx, Ly, b, h, t, etc.
+            name: Name of the property: name, code, material, type, Lx, Ly, b, h, t, etc.
 
         Returns:
             A string with the desired property
@@ -3832,21 +3818,6 @@ class NextFEMrest:
             A list of array of double values, each of size 2 (X,Y)
         '''
         return des(self.nfrest('GET', '/res/check/plotsectiondomain/'+str(domainIndex)+'/'+str(domainType)+'/'+str(cleanResponseTolerance)+'', None, None))
-    def getSectionResMoments(self, ID, station, calcType, N, Myy, Mzz):
-        ''' Get flexural strength of a beam station by calculating neutral axis
-        
-        Args:
-            ID: ID of the element
-            station: ID of station, from 1 to 5
-            calcType: 0 plastic, 1 elastic, 2 thermal-plastic, 3 thermal-elastic, 4 elastic limit, 5 thermal-elastic limit
-            N: Axial force. Positive for tension
-            Myy: Moment around vertical section axis
-            Mzz: Moment around horizontal section axis
-
-        Returns:
-            A string with serialized results in JSON format
-        '''
-        return self.nfrest('GET', '/op/sectioncalc/a/'+qt(ID)+'/'+str(station)+'/'+str(calcType)+'/'+str(N)+'/'+str(Myy)+'/'+str(Mzz)+'', None, None)
     def getSectionResMoments(self, sectionID, materialID, calcType, N, Myy, Mzz):
         ''' Get flexural strength of a section by calculating neutral axis
         
@@ -3902,21 +3873,21 @@ class NextFEMrest:
             A check structure with results
         '''
         return self.nfrest('GET', '/op/sectioncalc/d/'+str(sectionID)+'/'+str(calcType)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(domainTp)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, dict([("saveImages",saveImages),("options",options)]))
-    def getSectionResShear(self, sectionID, N=0, Mzz=0, Myy=0, Vy=0, Vz=0):
-        ''' Get section shear resistance by automatically selecting checking rules for section material
+    def getSectionResMomentsOnElem(self, ID, station, calcType, N, Myy, Mzz):
+        ''' Get flexural strength of a beam station by calculating neutral axis
         
         Args:
-            sectionID: ID of the section
-            N (optional): Optional. Axial force. Positive for tension
-            Mzz (optional): Optional. Moment around vertical section axis
-            Myy (optional): Optional. Moment around horizontal section axis
-            Vy (optional): Optional. Shear force in y direction
-            Vz (optional): Optional. Shear force in z direction
+            ID: ID of the element
+            station: ID of station, from 1 to 5
+            calcType: 0 plastic, 1 elastic, 2 thermal-plastic, 3 thermal-elastic, 4 elastic limit, 5 thermal-elastic limit
+            N: Axial force. Positive for tension
+            Myy: Moment around vertical section axis
+            Mzz: Moment around horizontal section axis
 
         Returns:
-            An array of size 2 with VrdY and VrdZ
+            A string with serialized results in JSON format
         '''
-        return des(self.nfrest('GET', '/op/sectioncalc/shear/'+str(sectionID)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', None, None))
+        return self.nfrest('GET', '/op/sectioncalc/a/'+qt(ID)+'/'+str(station)+'/'+str(calcType)+'/'+str(N)+'/'+str(Myy)+'/'+str(Mzz)+'', None, None)
     def getSectionResShear(self, sectionID, verName, N=0, Mzz=0, Myy=0, Vy=0, Vz=0):
         ''' Get section shear resistance
         
@@ -4014,16 +3985,6 @@ class NextFEMrest:
             An array of size 2 with VrdY and VrdZ
         '''
         return des(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
-    def getShearResFromDict(self, dict_:list):
-        ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
-        
-        Args:
-            dict_: Dictionary of string, double of an already performed checking
-
-        Returns:
-            An array of size 2 with VrdY and VrdZ
-        '''
-        return des(self.nfrest('POST', '/op/sectioncalc/shearres', dict, None))
     def getShellEndRelease(self, ID):
         ''' Give shell releases
         
@@ -4097,7 +4058,7 @@ class NextFEMrest:
             lc: The desired loadcase
 
         Returns:
-            Return nothing if empty results
+            Return empty list if no results
         '''
         return des(self.nfrest('GET', '/res/periods/'+qt(lc)+'', None, None))
     def getTotalMass(self, selectedNodes:list=None):
@@ -4202,7 +4163,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/dxf', None, dict([("path",path)])))
-    def importDXF(self, buffer:list):
+    def importDXFbytes(self, buffer:list):
         ''' Import DXF from bytes
         
         Args:
@@ -4253,16 +4214,6 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/midasfile', None, dict([("path",path)])))
-    def importMidas(self, model:list):
-        ''' Import a Midas GEN/Civil model in text format
-        
-        Args:
-            model: Array of model lines
-
-        Returns:
-            Boolean
-        '''
-        return sbool(self.nfrest('POST', '/op/import/midastext', model, None))
     def importMidasResults(self, path):
         ''' Read results from Midas GEN/Civil tables, copied to a text file
         
@@ -4273,16 +4224,6 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/midasresult', None, dict([("path",path)])))
-    def importMidasResults(self, text:list):
-        ''' Read results from Midas GEN/Civil tables, copied to a text file
-        
-        Args:
-            text: Array of strings
-
-        Returns:
-            Boolean
-        '''
-        return sbool(self.nfrest('POST', '/op/import/midasresulttext', text, None))
     def importMidasResultsAPI(self, MAPIkey, resultsToImport:list):
         ''' Import Midas results from Midas GEN NX/Civil NX API
         
@@ -4294,6 +4235,26 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('POST', '/op/import/midasresultapi', resultsToImport, dict([("mapi",MAPIkey)])))
+    def importMidasResultsText(self, text:list):
+        ''' Read results from Midas GEN/Civil tables, copied to a text file
+        
+        Args:
+            text: Array of strings
+
+        Returns:
+            Boolean
+        '''
+        return sbool(self.nfrest('POST', '/op/import/midasresulttext', text, None))
+    def importMidasText(self, model:list):
+        ''' Import a Midas GEN/Civil model in text format
+        
+        Args:
+            model: Array of model lines
+
+        Returns:
+            Boolean
+        '''
+        return sbool(self.nfrest('POST', '/op/import/midastext', model, None))
     def importNodeElemFiles(self, path):
         ''' Import a node/elem set of file
         
@@ -4388,7 +4349,7 @@ class NextFEMrest:
             Always true
         '''
         return sbool(self.nfrest('GET', '/op/import/sismicadset', None, dict([("path",path)])))
-    def importSismicadSects_Combo(self, text:list):
+    def importSismicadSects_ComboText(self, text:list):
         ''' Read section definitions and combinations from Sismicad tables, in TXT format
         
         Args:
@@ -4458,7 +4419,7 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/import/straus7result', None, dict([("path",path)])))
-    def importStrausResults(self, text:list):
+    def importStrausResultsText(self, text:list):
         ''' Read results from Straus7 tables, copied to a text file
         
         Args:
@@ -4516,6 +4477,14 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/element/iscolumn/'+qt(beamID)+'', None, None))
+    def isEmptyModel(self):
+        ''' Check if the model is empty
+        
+        
+        Returns:
+            True if the model is empty, False otherwise
+        '''
+        return sbool(self.nfrest('GET', '/op/empty', None, None))
     def isNodeLoaded(self, node):
         ''' Tell if the node is loaded or not
         
@@ -4721,7 +4690,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return self.nfrest('GET', '/op/new', None, None)
+        return sbool(self.nfrest('GET', '/op/new', None, None))
     def openIDEAcodeCheck(self):
         ''' Open IDEA CheckBot, if installed. Only for local instances of NextFEM Designer
         
@@ -4740,6 +4709,17 @@ class NextFEMrest:
             True if opening has been successful
         '''
         return sbool(self.nfrest('GET', '/op/open', None, dict([("path",filename)])))
+    def openModelFromBytes(self, bytes:list, modelFileName='model.nxf'):
+        ''' Open a model from bytes. The model can be in NXF or NXS format.
+        
+        Args:
+            bytes: Byte array containing the model data
+            modelFileName (optional): Optional name of the model file
+
+        Returns:
+            True if the model has been loaded correctly, False otherwise
+        '''
+        return sbool(self.nfrest('', ''+json.dumps(bytes)+'/'+qt(modelFileName)+'', None, None))
     def quad2tria(self, elem):
         ''' Transform a quad element into 2 tria elements
         
@@ -5670,7 +5650,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return self.nfrest('POST', '/op/opt/lang/'+qt(code)+'', None, None)
+        return sbool(self.nfrest('POST', '/op/opt/lang/'+qt(code)+'', None, None))
     def setLoadA(self, load:list):
         ''' Modify an existing load through an array, conforming to the one got via getLoadA
         
@@ -6008,16 +5988,6 @@ class NextFEMrest:
             1 if native propery has changes, 2 if custom property is added, 0 in case of error
         '''
         return int(self.nfrest('POST', '/section/prop/'+qt(ID)+'/'+qt(name)+'/'+str(value)+'', None, None))
-    def setSectionRebarsToElements(self, ID):
-        ''' Assign section rebars and stirrups in elements having the same section
-        
-        Args:
-            ID: ID of the section
-
-        Returns:
-            True is successful
-        '''
-        return sbool(self.nfrest('GET', '/section/rebar/toelems/'+qt(ID)+'', None, None))
     def setSectionRebarsToElements(self, ID):
         ''' Assign section rebars and stirrups in elements having the same section
         
