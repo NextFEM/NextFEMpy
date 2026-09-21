@@ -1847,6 +1847,27 @@ class NextFEMrest:
             True
         '''
         return sbool(self.nfrest('POST', '/op/docx/compile/'+str(twoPasses)+'', tableDict, dict([("dict",json.dumps(dict_))])))
+    def convertSectionToThinWalled(self, ID, CF_rc=0):
+        ''' Convert the selected section to its thin-walled representation (axis + thickness)
+        
+        Args:
+            ID: ID of the section to be converted in-place
+            CF_rc (optional): Optional. Curvature radius, default 0 (auto-assigned by the program to thickness / 10)
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/section/convertw/'+str(ID)+'/'+str(CF_rc)+'', None, None))
+    def convertThinWalledToSection(self, ID):
+        ''' Convert the selected thin-walled section to its compact representation
+        
+        Args:
+            ID: ID of the section to be converted in-place
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/section/convertc/'+str(ID)+'', None, None))
     def convertToMeshedSection(self, sectionID):
         ''' Convert an existing section to a new tria-meshed section. Remember to re-assign the new section to elements with assignSectionToElement
         
@@ -2238,6 +2259,17 @@ class NextFEMrest:
             
         '''
         return sbool(self.nfrest('GET', '/op/export/xmlres', None, dict([("path",filename)])))
+    def extrudeBeamBySection(self, elemIDs:list, useShells=True):
+        ''' Convert in-place a line element by extruding it to shell or solid elements by means of its section. It may require ColdFormed module license to work, depending on the type section.
+        
+        Args:
+            elemIDs: Array of beam element IDs to convert
+            useShells (optional): Optional, default is true. If set to false, use solid elements.
+
+        Returns:
+            True, even if the conversion fails
+        '''
+        return sbool(self.nfrest('GET', '/element/extrudebeambysect/'+str(useShells)+'', elemIDs, None))
     def functionFromFile(self, filename, type_=9, units=''):
         ''' Load a function from text file.
         
@@ -2389,7 +2421,7 @@ class NextFEMrest:
             time (optional): Optional. Default is 1 = linear analysis
 
         Returns:
-            A vector of size 6. Null vector if something went wrong
+            A vector of size 6 (N, Vy, Vz, Mt, Myy, Mzz). Null vector if something went wrong
         '''
         return des(self.nfrest('GET', '/res/beamforces/'+qt(num)+'/'+qt(loadcase)+'/'+str(station)+'/'+qt(time)+'', None, None))
     def getBeamForcesAtNode(self, elem, node, loadcase, time='1'):
@@ -2425,8 +2457,10 @@ class NextFEMrest:
         
         Args:
             num: Element no.
-            stationsMode: 0 for 5 stations, 1 for 3 stations, 2 for I and J, 3 for I only, 4 for J only, 5 for M only, 6 for 1/4, 7 for 3/4, 8 for M and 1/4 and 3/4, 9 for 1/4 and 3/4
-            loadcases (optional): Array of reference loadcases.
+            stationsMode: 0 for 5 stations, 1 for 3 stations, 2 for I and J, 3 for I only, 4 for J only, 5 for M only, 6 for 1/4, 7 for 3/4, 
+ 8 for M and 1/4 and 3/4, 9 for 1/4 and 3/4
+            loadcases (optional): Array of reference loadcases. As an alternative, to include all ultimate combinations, 
+ set only one item with "»1", "»2" for serviceability combos, "»3" for seismic combos
 
         Returns:
             A table as a list of string arrays.
@@ -2769,7 +2803,9 @@ class NextFEMrest:
         
         Args:
             ID: ID of the element
-            name: Name of the property: num, angle, groupE, isJoint, isTruss, isPlaneStress, lun, mat, member, offsetI, offsetJ, sect, set2, sprProp, type
+            name: Name of the property: num, angle, groupE, isJoint, isTruss, isPlaneStress, lun, mat, 
+ member, offsetI, offsetJ, sect, set2, sprProp, 
+ type (1 line, 2 tria, 3 quad, 4 hexa, 5 wedge, 6 tetra, spring 40, 20 line3, 21 quad8, 23 hexa20, 24 tetra10, 25 tria6, 26 wedge15), types (type as string)
 
         Returns:
             The requested value as string. Empty in case of error
@@ -3644,6 +3680,14 @@ class NextFEMrest:
             Array of double
         '''
         return des(self.nfrest('GET', '/res/partfactors/'+str(mode)+'/'+qt(loadcase)+'', None, None))
+    def getQuasiPermanentLoadcase(self):
+        ''' Get the loadcase hosting the quasi-permanent loading condition, if already set
+        
+        
+        Returns:
+            Name of the loadcase or combination
+        '''
+        return self.nfrest('GET', '/load/getqp', None, None)
     def getReinfPropertiesNTC(self, matID, secID, CF, betaAng, Hshear, Bshear, outInMPa=False):
         ''' Get design data for FRP/FRCM strips as per CNR DT 200 Italian code
         
@@ -3780,7 +3824,9 @@ class NextFEMrest:
         
         Args:
             ID: ID of the section
-            name: Name of the property: name, code, material, type, Lx, Ly, b, h, t, etc.
+            name: Name of the property: name, code, material, type (0 unk, 1 beam, 2 planar), 
+ beamtype (0 unk, 1 rect, 2 circ, 3 C, 4 T, 5 DT, 6 L, 7 box, 8 ring, 9 doubleL, 10 doubleC, 11 omega),
+ types (type as string),beamtypes (beamtype as string), Lx, Ly, b, h, t, etc.
 
         Returns:
             A string with the desired property
@@ -3921,6 +3967,25 @@ class NextFEMrest:
             A dictionary of {string, double} containing all the results from calculation
         '''
         return des(self.nfrest('POST', '/op/sectioncalc/shear2/'+str(sectionID)+'/'+qt(verName)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(Vy)+'/'+str(Vz)+'', overrideValues, None))
+    def getSectionShearFRPImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False, thickOverride=0):
+        ''' Get section plot with FRP/FRCM shear strips into an array of Bytes of Png image. A previous call to setShearReinfRCdata is required to set the shear reinforcement data.
+        
+        Args:
+            sectionID: ID of the section
+            titleX (optional): Optional title for X axis
+            titleY (optional): Optional title for Y axis
+            title (optional): Optional graph title
+            quoteUnits (optional): Optional. Units of quotes, if set display quotes
+            quoteFormat (optional): Optional. Numeric format of quotes
+            showAxes (optional): Optional, default true
+            showOrigin (optional): Optional, default 0. 1 to show Z and Y arrows, 2 for X and Y arrows
+            transparent (optional): Optional, default false. If true, set transparent background
+            thickOverride (optional): Optional, default 0. Index of rebar to highlight, 0 to remove highlightning. Set to -1 to remove bars and show section center
+
+        Returns:
+            Array of bytes
+        '''
+        return self.nfrestB('GET', '/op/sectioncalc/shearfrp/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(thickOverride)+'', None, None)
     def getSectionsLibrary(self, filter=''):
         ''' Return an array of string containing section names from built-in library.
         
@@ -4568,6 +4633,14 @@ class NextFEMrest:
             The name of the new loadcase created
         '''
         return self.nfrest('GET', '/loadcase/fromcombo/'+qt(comboName)+'', None, None)
+    def materialAvailableFlags(self):
+        ''' Return a dictionary of all flags that can be defined for a material, with their description
+        
+        
+        Returns:
+            Dictionary of flags and their descriptions
+        '''
+        return des(self.nfrest('', '', None, None))
     def mergeImportedLines(self, lineIDs:list):
         ''' Merge selected Line elements with imported results
         
@@ -4690,7 +4763,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return sbool(self.nfrest('GET', '/op/new', None, None))
+        return self.nfrest('GET', '/op/new', None, None)
     def openIDEAcodeCheck(self):
         ''' Open IDEA CheckBot, if installed. Only for local instances of NextFEM Designer
         
@@ -5878,6 +5951,54 @@ class NextFEMrest:
             
         '''
         return sbool(self.nfrest('GET', '/element/planestress/'+qt(id_)+'/'+str(isPlaneStress)+'', None, None))
+    def setQuasiPermanentLoadcase(self, loadcase):
+        ''' Set the loadcase hosting the quasi-permanent loading condition. Empty string to delete the setting
+        
+        Args:
+            loadcase: Name of the loadcase
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/load/setqp/'+qt(loadcase)+'', None, None))
+    def setRebarColorInSection(self, sectionID, rebarID, color):
+        ''' Set a rotation angle for a rebar. Useful for rectangular steel plates or reinforcing strips.
+        
+        Args:
+            sectionID: ID of the section
+            rebarID: ID of the rebar, starting from 1. Get the id by calling getSectionRebarCoords and/or getSectionRebarSize
+            color: Color as integer in ARGB format. Pass 0 to remove the setting and revert to standard color
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('GET', '/section/rebar/color/'+str(sectionID)+'/'+str(rebarID)+'/'+str(color)+'', None, None))
+    def setRebarRotation(self, elem, Linit, Lfin, rebarID, rotation):
+        ''' Set a rotation angle for a rebar. Useful for rectangular steel plates or reinforcing strips.
+        
+        Args:
+            elem: ID of the element
+            Linit: Initial abscissa from 0 to 1
+            Lfin: Final abscissa from 0 to 1
+            rebarID: ID of the rebar, starting from 1. Get the id by calling getSectionRebarCoords and/or getSectionRebarSize
+            rotation: Rotation in degrees [°]. Pass 0 to remove the setting
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('GET', '/element/rebar/rotation/'+qt(elem)+'/'+str(Linit)+'/'+str(Lfin)+'/'+str(rebarID)+'/'+str(rotation)+'', None, None))
+    def setRebarRotationInSection(self, sectionID, rebarID, rotation):
+        ''' Set a rotation angle for a rebar. Useful for rectangular steel plates or reinforcing strips.
+        
+        Args:
+            sectionID: ID of the section
+            rebarID: ID of the rebar, starting from 1. Get the id by calling getSectionRebarCoords and/or getSectionRebarSize
+            rotation: Rotation in degrees [°]. Pass 0 to remove the setting
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('GET', '/section/rebar/rotation/'+str(sectionID)+'/'+str(rebarID)+'/'+str(rotation)+'', None, None))
     def setResponseSpectrumAnalysis(self, direction, loadcase, modesNumber, spectrumFuncID, modalDamping=0.05, factor=1):
         ''' Set a Response Spectrum analysis on an existing loadcase
         
@@ -6053,7 +6174,18 @@ class NextFEMrest:
         Returns:
             True if successful
         '''
-        return sbool(self.nfrest('GET', '/section/set/shearreinfrc/'+str(ID)+'', None, dict([("data",json.dumps(data))])))
+        return sbool(self.nfrest('GET', '/section/set/shearreinf/'+str(ID)+'', None, dict([("data",json.dumps(data))])))
+    def setShearReinfRCelementData(self, ID, data:list):
+        ''' Set or overwrite material data for shear reinforcement with tension-fragile design material in RC element. Set Shear strip width less than or equal to 0 to remove data
+        
+        Args:
+            ID: ID of the element
+            data: Array containing: Shear strip width, Shear strip spacing, Shear strip angle [°], Shear strip material ID, Shear strip thickness [mm], Shear strip height, Confinement strip spacing (-1 for continuous), Shear strip height along base
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/element/rebar/shearreinf/'+str(ID)+'', None, dict([("data",json.dumps(data))])))
     def setShellEndRelease(self, ID, node, DOFmask:list):
         ''' Set end release for shell element
         
