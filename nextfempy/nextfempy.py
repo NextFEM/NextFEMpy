@@ -1441,6 +1441,14 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/load/lateralforces/'+str(thID)+'/'+qt(loadCaseX)+'/'+qt(loadCaseY)+'/'+str(propMasses)+'/'+str(T1)+'/'+str(ct)+'/'+str(lam)+'', None, None))
+    def areColumns(self):
+        ''' Returns all the vertical elements in the model
+        
+        
+        Returns:
+            Boolean
+        '''
+        return des(self.nfrest('GET', '/element/arecolumns', None, None))
     def areRebarsInsideSection(self, ID):
         ''' Check if all rebars are inside the section. Only the first fill figure is considered.
         
@@ -2269,7 +2277,7 @@ class NextFEMrest:
         Returns:
             True, even if the conversion fails
         '''
-        return sbool(self.nfrest('GET', '/element/extrudebeambysect/'+str(useShells)+'', elemIDs, None))
+        return sbool(self.nfrest('POST', '/element/extrudebeambysect/'+str(useShells)+'', elemIDs, None))
     def functionFromFile(self, filename, type_=9, units=''):
         ''' Load a function from text file.
         
@@ -2488,6 +2496,20 @@ class NextFEMrest:
             An array containing a list of {abscissa,Vry,-Vry,Vrz,-Vrz}
         '''
         return des(self.nfrest('GET', '/res/check/beamshearres/'+qt(elemID)+'/'+qt(loadcase)+'/'+qt(time)+'', None, None))
+    def getBeamsForcesEnvelopeTable(self, elems:list, stationsMode, loadcases:list=None):
+        ''' Get beam forces consistent envelope, as a table. Envelopes are made on specified loadcases, or on all result cases. Suitable for many combinations or for time-history analyses.
+        
+        Args:
+            elems: Element IDs
+            stationsMode: 0 for 5 stations, 1 for 3 stations, 2 for I and J, 3 for I only, 4 for J only, 5 for M only, 6 for 1/4, 7 for 3/4, 
+ 8 for M and 1/4 and 3/4, 9 for 1/4 and 3/4
+            loadcases (optional): Array of reference loadcases. As an alternative, to include all ultimate combinations, 
+ set only one item with "»1", "»2" for serviceability combos, "»3" for seismic combos
+
+        Returns:
+            A table as a list of string arrays.
+        '''
+        return des(self.nfrest('POST', '/res/beamsforcesenvtable/'+str(stationsMode)+'', loadcases, dict([("elems",json.dumps(elems))])))
     def getBillOfMaterials(self, selectedElements:list=None):
         ''' Get the bill of materials of the current model, or for the selected elements
         
@@ -2560,6 +2582,14 @@ class NextFEMrest:
             -1 if not defined, 0 Ultimate Limit State, 1 Seismic combination, 2 Serviceability, 3 Serviceability-Characteristic, 4 Serviceability-Frequent, 5 Serviceability-QuasiPermanent
         '''
         return int(self.nfrest('GET', '/loadcase/combo/designtype/'+qt(name)+'', None, None))
+    def getCombinationFactors(self):
+        ''' Returns a dictionary with combination coefficients set in the model, including partial ones.
+        
+        
+        Returns:
+            Dictionary of string, double
+        '''
+        return des(self.nfrest('GET', '/loadcase/getcfactors', None, None))
     def getCombinationsByDesignType(self, type_, servType=0):
         ''' Get an array of linear add combinations of the selected design type
         
@@ -2570,7 +2600,7 @@ class NextFEMrest:
         Returns:
             Array of strings
         '''
-        return des(self.nfrest('GET', '/loadcases/descombos/designtype/'+str(type_)+'/'+str(servType)+'', None, None))
+        return des(self.nfrest('GET', '/loadcases/descombos/'+str(type_)+'/'+str(servType)+'', None, None))
     def getConnectedElements(self, node, onlyOfType=-1):
         ''' Get all the elements connected to the specified node
         
@@ -3737,6 +3767,14 @@ class NextFEMrest:
             Return an array of size 2 with the relative length of the rigid offset for ends I and J, respectively
         '''
         return des(self.nfrest('GET', '/element/beamendoffset/'+qt(beamID)+'', None, None))
+    def getRSLoadCases(self):
+        ''' Get the names of Response Spectrum analysis loadcases set in the model.
+        
+        
+        Returns:
+            Array of strings
+        '''
+        return des(self.nfrest('GET', '/loadcases/rs', None, None))
     def getSectionColor(self, ID):
         ''' Get the color of the selected section in RGB format
         
@@ -4032,14 +4070,6 @@ class NextFEMrest:
             
         '''
         return self.nfrest('GET', '/load/getsw', None, None)
-    def getSeparator(self):
-        ''' Returns separator used by the program
-        
-        
-        Returns:
-            String value
-        '''
-        return self.nfrest('GET', '/op/sep', None, None)
     def getShearResFromDict(self, dict_:list):
         ''' Get section shear resistance from an already performed checking given in a dictionary of string, double
         
@@ -5450,7 +5480,7 @@ class NextFEMrest:
             rz: True if restrained
 
         Returns:
-            True if successful
+            True if node is found. Any previous restraint will be overwritten
         '''
         return sbool(self.nfrest('GET', '/bc/set/'+qt(node)+'/'+str(x)+'/'+str(y)+'/'+str(z)+'/'+str(rx)+'/'+str(ry)+'/'+str(rz)+'', None, None))
     def setBeamAngle(self, num, angle):
