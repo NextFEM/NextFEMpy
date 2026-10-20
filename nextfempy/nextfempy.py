@@ -2658,6 +2658,23 @@ class NextFEMrest:
             Array of bytes
         '''
         return self.nfrestB('GET', '/function/plotdata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)]))
+    def getDataPlotly(self, xseries:list, yseries:list, transparent, name='', Xunits='', Yunits='', color=0, useDots=True):
+        ''' Get plot of the given user data in JSON for Plotly
+        
+        Args:
+            xseries: X series of user data
+            yseries: Y series of user data
+            transparent: If true, set transparent background
+            name (optional): Optional. Title of the plot
+            Xunits (optional): Optional. Units for x axis
+            Yunits (optional): Optional. Units for y axis
+            color (optional): Optional. Default is 0 (black)
+            useDots (optional): Optional. Default is false
+
+        Returns:
+            JSON for Plotly
+        '''
+        return self.nfrest('GET', '/function/plotlydata/'+str(transparent)+'/'+qt(name)+'/'+str(color)+'/'+str(useDots)+'', None, dict([("xseries",json.dumps(xseries)),("yseries",json.dumps(yseries)),("Xunits",Xunits),("Yunits",Yunits)]))
     def getDefinedDesignMaterials(self):
         ''' Return a list of used design material IDs
         
@@ -2968,6 +2985,24 @@ class NextFEMrest:
             Array of vert3 instances
         '''
         return des(self.nfrest('GET', '/element/extrudedbeam/'+qt(elemID)+'', None, None))
+    def getFireSectionForPlotly(self, elemID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False):
+        ''' Get section plot into a JSON for Plotly
+        
+        Args:
+            elemID: ID of the element with the desired section
+            titleX (optional): Optional title for X axis
+            titleY (optional): Optional title for Y axis
+            title (optional): Optional graph title
+            quoteUnits (optional): Optional. Units of quotes, if set display quotes
+            quoteFormat (optional): Optional. Numeric format of quotes
+            showAxes (optional): Optional, default true
+            showOrigin (optional): Optional, default 0. 1 to show Z and Y arrows, 2 for X and Y arrows
+            transparent (optional): Optional, default false. If true, set transparent background
+
+        Returns:
+            JSON for Plotly
+        '''
+        return self.nfrest('GET', '/op/sectioncalc/fireplotly/'+str(elemID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'', None, None)
     def getFireSectionImage(self, elemID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False):
         ''' Get section plot into an array of Bytes of Png image
         
@@ -3070,6 +3105,16 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/function/plot/'+str(funcID)+'', None, dict([("path",imagePath)])))
+    def getFunctionPlotly(self, funcID):
+        ''' Get plot of the selected function in JSON for Plotly
+        
+        Args:
+            funcID: ID of the function
+
+        Returns:
+            JSON for Plotly
+        '''
+        return self.nfrest('GET', '/function/plotly/'+str(funcID)+'', None, None)
     def getFunctions(self):
         ''' Get a list of IDs of already defined functions
         
@@ -3514,6 +3559,23 @@ class NextFEMrest:
             loadcase parameters is passed by reference, hence the selected loadcase is returned if loadcase is empty
         '''
         return int(self.nfrest('GET', '/res/modes/'+str(loadcase)+'', None, None))
+    def getMultiplePlotlys(self, plotList:list, transparent=False, names:list=None, Xunits='', Yunits='', colors:list=None, useDots:list=None, showLegend=False):
+        ''' Get plots of multiple series in JSON for Plotly
+        
+        Args:
+            plotList: List of list of double[2] arrays
+            transparent (optional): If true, set transparent background
+            names (optional): Optional. Titles of the plots
+            Xunits (optional): Optional. Units for x axis
+            Yunits (optional): Optional. Units for y axis
+            colors (optional): Optional. Array of plot colors
+            useDots (optional): Optional. Array of boolean values for using dots in each plot
+            showLegend (optional): Optional. True to enable graph legend
+
+        Returns:
+            JSON for Plotly
+        '''
+        return self.nfrest('POST', '/function/plotlymultipledata/'+str(transparent)+'/'+json.dumps(names)+'/'+qt(Xunits)+'/'+qt(Yunits)+'/'+str(showLegend)+'', plotList, dict([("colors",json.dumps(colors)),("useDots",json.dumps(useDots))]))
     def getMultiplePlots(self, plotList:list, transparent=False, names:list=None, Xunits='', Yunits='', colors:list=None, useDots:list=None, showLegend=False):
         ''' Get plots of multiple series in a single PNG image
         
@@ -3810,6 +3872,25 @@ class NextFEMrest:
             A 2-dimensional array of double
         '''
         return des(self.nfrest('GET', '/section/figure/'+str(sectionID)+'/'+str(figureID)+'/'+str(isHole)+'', None, None))
+    def getSectionForPlotly(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False, selectedBar=0):
+        ''' Get section plot as JSON for plotly.js
+        
+        Args:
+            sectionID: ID of the section
+            titleX (optional): Optional title for X axis
+            titleY (optional): Optional title for Y axis
+            title (optional): Optional graph title
+            quoteUnits (optional): Optional. Units of quotes, if set display quotes
+            quoteFormat (optional): Optional. Numeric format of quotes
+            showAxes (optional): Optional, default true
+            showOrigin (optional): Optional, default 0. 1 to show Z and Y arrows, 2 for X and Y arrows
+            transparent (optional): Optional, default false. If true, set transparent background
+            selectedBar (optional): Optional, default 0. Index of rebar to highlight, 0 to remove highlightning. Set to -1 to remove bars and show section center
+
+        Returns:
+            JSON for plotly.js
+        '''
+        return self.nfrest('GET', '/op/sectioncalc/plotlyB/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(selectedBar)+'', None, None)
     def getSectionImage(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False, selectedBar=0):
         ''' Get section plot into an array of Bytes of Png image
         
@@ -3957,6 +4038,25 @@ class NextFEMrest:
             A check structure with results
         '''
         return self.nfrest('GET', '/op/sectioncalc/d/'+str(sectionID)+'/'+str(calcType)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(domainTp)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, dict([("saveImages",saveImages),("options",options)]))
+    def getSectionResMoments5(self, sectionID, calcType, N, Mzz, Myy, domainTp=0, options=None, Nserv=0, Mzzserv=0, Myyserv=0):
+        ''' Get flexural strength of a section by calculating neutral axis. Material must be set as section property, see setSectionMaterial.
+        
+        Args:
+            sectionID: ID of the section
+            calcType: 0 plastic, 1 elastic, 2 thermal-plastic, 3 thermal-elastic, 4 elastic limit, 5 thermal-elastic limit
+            N: Axial force. Positive for tension
+            Mzz: Moment around vertical section axis
+            Myy: Moment around horizontal section axis
+            domainTp (optional): Optional. Domain type for image: 0 for Myy_Mzz, 1 for N_Myy, 2 for N_Mzz
+            options (optional): Optional. Calculation options
+            Nserv (optional): Optional. Serviceability axial force. Positive for tension
+            Mzzserv (optional): Optional. Serviceability Mzz
+            Myyserv (optional): Optional. Serviceability Myy
+
+        Returns:
+            Results in JSON including plots for Plotly. Field named 'errorMsg', 'plotly_plot' and 'plotly_domain' are strings
+        '''
+        return self.nfrest('GET', '/op/sectioncalc/e/'+str(sectionID)+'/'+str(calcType)+'/'+str(N)+'/'+str(Mzz)+'/'+str(Myy)+'/'+str(domainTp)+'/'+str(Nserv)+'/'+str(Mzzserv)+'/'+str(Myyserv)+'', None, dict([("options",options)]))
     def getSectionResMomentsOnElem(self, ID, station, calcType, N, Myy, Mzz):
         ''' Get flexural strength of a beam station by calculating neutral axis
         
@@ -4024,6 +4124,25 @@ class NextFEMrest:
             Array of bytes
         '''
         return self.nfrestB('GET', '/op/sectioncalc/shearfrp/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(thickOverride)+'', None, None)
+    def getSectionShearFRPPlotly(self, sectionID, titleX='', titleY='', title='', quoteUnits='', quoteFormat='0.00', showAxes=True, showOrigin=0, transparent=False, thickOverride=0):
+        ''' Get section plot with FRP/FRCM shear strips into JSON for Plotly. A previous call to setShearReinfRCdata is required to set the shear reinforcement data.
+        
+        Args:
+            sectionID: ID of the section
+            titleX (optional): Optional title for X axis
+            titleY (optional): Optional title for Y axis
+            title (optional): Optional graph title
+            quoteUnits (optional): Optional. Units of quotes, if set display quotes
+            quoteFormat (optional): Optional. Numeric format of quotes
+            showAxes (optional): Optional, default true
+            showOrigin (optional): Optional, default 0. 1 to show Z and Y arrows, 2 for X and Y arrows
+            transparent (optional): Optional, default false. If true, set transparent background
+            thickOverride (optional): Optional, default 0. Index of rebar to highlight, 0 to remove highlightning. Set to -1 to remove bars and show section center
+
+        Returns:
+            JSON for Plotly
+        '''
+        return self.nfrest('GET', '/op/sectioncalc/shearfrpplotly/'+str(sectionID)+'/'+qt(titleX)+'/'+qt(titleY)+'/'+qt(title)+'/'+qt(quoteUnits)+'/'+qt(quoteFormat)+'/'+str(showAxes)+'/'+str(showOrigin)+'/'+str(transparent)+'/'+str(thickOverride)+'', None, None)
     def getSectionsLibrary(self, filter=''):
         ''' Return an array of string containing section names from built-in library.
         
@@ -4701,6 +4820,16 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('PUT', '/model/data'+qt(modeldata)+'', None, None))
+    def mergeModelDataD(self, modeldatad):
+        ''' Merge a new model (with dictionaries) to the existing one
+        
+        Args:
+            modeldatad: Model in JSON format with dictionaries
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('PUT', '/model/datad'+qt(modeldatad)+'', None, None))
     def mergeModelResults(self, modelresults):
         ''' Merge a new set of results to the existing ones
         
@@ -4711,6 +4840,16 @@ class NextFEMrest:
             
         '''
         return sbool(self.nfrest('PUT', '/model/results'+qt(modelresults)+'', None, None))
+    def mergeModelResultsD(self, modelresultsd):
+        ''' Merge a new set of results (with dictionaries) to the existing ones
+        
+        Args:
+            modelresultsd: Results in JSON format
+
+        Returns:
+            
+        '''
+        return sbool(self.nfrest('PUT', '/model/results'+qt(modelresultsd)+'', None, None))
     def mergeOverlappedNodes(self):
         ''' Merge overlapped nodes in the model
         
@@ -5404,7 +5543,7 @@ class NextFEMrest:
             path: Path for saving image, in PNG format. Only path and filename are required, no extension.
 
         Returns:
-            True if successed
+            True if successful
         '''
         return sbool(self.nfrest('GET', '/op/sectioncalc/imagewithbars/'+qt(elemID)+'/'+str(progr)+'', None, dict([("path",path)])))
     def scaleNodes(self, nodes:list, scaleX, scaleY, scaleZ, scaleCenterX=0, scaleCenterY=0, scaleCenterZ=0):
@@ -5423,6 +5562,17 @@ class NextFEMrest:
             Boolean
         '''
         return sbool(self.nfrest('GET', '/op/mesh/scalenodes/'+str(scaleX)+'/'+str(scaleY)+'/'+str(scaleZ)+'/'+str(scaleCenterX)+'/'+str(scaleCenterY)+'/'+str(scaleCenterZ)+'', None, dict([("nodes",json.dumps(nodes))])))
+    def sectionForPlotlyWithBars(self, elemID, progr):
+        ''' Return a plot of an element section with rebar, if any, as JSON for Plotly
+        
+        Args:
+            elemID: ID of the element
+            progr: Progressive on element, from 0 to 100
+
+        Returns:
+            JSON for Plotly
+        '''
+        return self.nfrest('GET', '/op/sectioncalc/plotlywithbars/'+qt(elemID)+'/'+str(progr)+'', None, None)
     def SectionToModel(self, sectionID, saveModelPath=''):
         ''' Write model of a section, meshed with Tria elements, typically for thermal analysis
         
@@ -6600,6 +6750,14 @@ class NextFEMrest:
         '''   Model in JSON format   '''
         self.nfrest('POST','/model/data',value)
     @property
+    def modeldatad(self):
+        '''   Model in JSON format with dictionaries   '''
+        return self.nfrest('GET','/model/datad')
+    @modeldatad.setter
+    def modeldatad(self,value):
+        '''   Model in JSON format with dictionaries   '''
+        self.nfrest('POST','/model/datad', heads={'val':str(value)})
+    @property
     def modelName(self):
         '''   Name of the model. To be set prior to launch to have properly-named temporary files.   '''
         return self.nfrest('GET','/model')
@@ -6619,6 +6777,14 @@ class NextFEMrest:
     def modelresults(self,value):
         '''   Results in JSON format   '''
         self.nfrest('POST','/model/results',value)
+    @property
+    def modelresultsd(self):
+        '''   Results in JSON format with dictionaries   '''
+        return self.nfrest('GET','/model/resultsd')
+    @modelresultsd.setter
+    def modelresultsd(self,value):
+        '''   Results in JSON format with dictionaries   '''
+        self.nfrest('POST','/model/resultsd', heads={'val':str(value)})
     @property
     def nodeColor(self):
         '''   Change color for nodes   '''
