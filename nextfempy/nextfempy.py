@@ -1060,19 +1060,21 @@ class NextFEMrest:
             The ID assigned to the section.
         '''
         return int(self.nfrest('GET', '/section/add/fromdxf/'+str(CF_tw)+'/'+str(CF_rc)+'/'+str(material)+'', None, dict([("path",path)])))
-    def addSeriesFunction(self, Xlist:list, Ylist:list, type_, units=''):
+    def addSeriesFunction(self, Xlist:list, Ylist:list, type_, units='', name=''):
         ''' Add a time series function to the model
         
         Args:
             Xlist: Array of times/periods
             Ylist: Array of values, same size of Xlist
-            type_: 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
-            units (optional): Units of measure for data in ordinate (Y)
+            type_: 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum, 5 lateral forces vs. height, 
+ 6 vertical forces vs. lenght, 7 time-temperature, 8 strength-temperature, 9 user type
+            units (optional): Optional. Units of measure for data in ordinate (Y)
+            name (optional): Optional. Name of the function
 
         Returns:
             The ID of the time series, -1 in case of errors
         '''
-        return int(self.nfrest('GET', '/function/add/'+str(type_)+'', None, dict([("x",json.dumps(Xlist)),("y",json.dumps(Ylist)),("units",units)])))
+        return int(self.nfrest('GET', '/function/add/'+str(type_)+'/'+qt(name)+'', None, dict([("x",json.dumps(Xlist)),("y",json.dumps(Ylist)),("units",units)])))
     def addSineFunction(self, frequency, phase, stp, duration, maxAmplitude, isGrowing=False, type_=0, units=''):
         ''' Add a sine function to the model. It can be growing or not.
         
@@ -2047,8 +2049,8 @@ class NextFEMrest:
         
         Args:
             quadID: ID of the existing Quad
-            divX: Number of divisions in X direction
-            divY: Number of divisions in Y direction
+            divX: Number of divisions in first direction (node2-node1)
+            divY: Number of divisions in second direction (node4-node1)
 
         Returns:
             An array containing the IDs of newly created Quad elements
@@ -2283,7 +2285,8 @@ class NextFEMrest:
         
         Args:
             filename: Path of the text file containing function to load
-            type_ (optional): 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum
+            type_ (optional): 0 displacement TH, 1 velocity TH, 2 acceleration TH, 3 acceleration spectrum, 4 displacement spectrum, 5 lateral forces vs. height, 
+ 6 vertical forces vs. lenght, 7 time-temperature, 8 strength-temperature, 9 user type
             units (optional): Units of measure for data in ordinate (Y)
 
         Returns:
@@ -5376,6 +5379,17 @@ class NextFEMrest:
             Boolean value
         '''
         return sbool(self.nfrest('GET', '/section/rename/'+str(sectionID)+'/'+qt(name)+'/'+qt(code)+'', None, None))
+    def renameSeriesFunction(self, funcID, newName):
+        ''' Rename an existing series function
+        
+        Args:
+            funcID: ID of the already existing function
+            newName: New name to be assigned to the function
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('POST', '/function/rename/'+str(funcID)+'', newName, None))
     def renumberElements(self, initialID, step_):
         ''' Renumber elements in the model
         
@@ -5887,13 +5901,13 @@ class NextFEMrest:
         ''' Set custom data stored in the selected function
         
         Args:
-            funcID: 
-            data: 
+            funcID: ID of the function
+            data: Dictionary of string, string
 
         Returns:
             Boolean value
         '''
-        return sbool(self.nfrest('POST', '/function/gendata/'+str(funcID)+'', None, dict([("data",json.dumps(data))])))
+        return sbool(self.nfrest('POST', '/function/gendata/'+str(funcID)+'', data, None))
     def setLanguage(self, code):
         ''' Set language code
         
