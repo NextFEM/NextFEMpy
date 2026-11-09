@@ -1,3 +1,6 @@
+import base64
+import sys
+
 import requests,json,urllib,os,urllib3
 
 # Disable InsecureRequestWarning
@@ -65,44 +68,36 @@ class NextFEMrest:
             for dd in headersDict:
                 self.headers[dd]=headersDict[dd]
 
-    def nfrest(self, method, command, body=None, heads=None)->str:
+    def _request(self, method, command, body, heads):
+        if method not in ("GET", "POST", "PUT", "DELETE"):
+            raise ValueError(f"Unsupported NextFEM HTTP method: {method!r}")
+
         url = self.baseUrl + command
-        hds=dict()
-        for dd in self.headers:
-            hds[dd]=self.headers[dd]
-        if not(heads is None):
-            for dd in heads:
-                hds[dd]=heads[dd]
-        if method == "POST":
-            response = requests.post(url=url, headers=hds, json=body, verify=False)
-        elif method == "PUT":
-            response = requests.put(url=url, headers=hds, json=body, verify=False)
-        elif method == "GET":
-            response = requests.get(url=url, headers=hds, verify=False)
-        elif method == "DELETE":
-            response = requests.delete(url=url, headers=hds, verify=False)
-        # print request and return response
-        if self.msg: print("*** " + self.user + " :: " + method, command, response.status_code)
+        headers = {**self.headers, **(heads or {})}
+        endpoint = command.split("?", 1)[0]
+        try:
+            if method in ("POST", "PUT"):
+                response = requests.request(method, url, headers=headers, json=body, verify=False)
+            else:
+                response = requests.request(method, url, headers=headers, verify=False)
+        except requests.RequestException as exc:
+            raise RuntimeError(f"NextFEM {method} {endpoint}: {type(exc).__name__}") from None
+
+        if self.msg:
+            print(f"*** {self.user} :: {method} {endpoint} {response.status_code}")
+        if not 200 <= response.status_code < 300:
+            raise RuntimeError(f"NextFEM {method} {endpoint}: HTTP {response.status_code}")
+        return response
+
+    def nfrest(self, method, command, body=None, heads=None, *, expect_body=False)->str:
+        response = self._request(method, command, body, heads)
+        if expect_body and not response.text.strip():
+            print(f"NextFEM {method} {command}: empty response (HTTP {response.status_code})",
+                  file=sys.stderr)
         return response.text
 
     def nfrestB(self, method, command, body=None, heads=None)->bytes:
-        # return bytes
-        url = self.baseUrl + command
-        hds=dict()
-        for dd in self.headers:
-            hds[dd]=self.headers[dd]
-        if not(heads is None):
-            for dd in heads:
-                hds[dd]=heads[dd]
-        if method == "POST":
-            response = requests.post(url=url, headers=hds, json=body, verify=False)
-        elif method == "PUT":
-            response = requests.put(url=url, headers=hds, json=body, verify=False)
-        elif method == "GET":
-            response = requests.get(url=url, headers=hds, verify=False)
-        elif method == "DELETE":
-            response = requests.delete(url=url, headers=hds, verify=False)
-        return response.content
+        return self._request(method, command, body, heads).content
 
     # methods and properties for Server
     def saveUser(self): 
@@ -728,7 +723,7 @@ class NextFEMrest:
         Returns:
             The ID of the added node, empty string in case of error
         '''
-        return self.nfrest('GET', '/node/add/'+str(x)+'/'+str(y)+'/'+str(z)+'/'+str(lcs1X)+'/'+str(lcs1Y)+'/'+str(lcs1Z)+'/'+str(lcs2X)+'/'+str(lcs2Y)+'/'+str(lcs2Z)+'', None, None)
+        return self.nfrest('GET', '/node/add/'+str(x)+'/'+str(y)+'/'+str(z)+'/'+str(lcs1X)+'/'+str(lcs1Y)+'/'+str(lcs1Z)+'/'+str(lcs2X)+'/'+str(lcs2Y)+'/'+str(lcs2Z)+'', None, None, expect_body=True)
     def addNodeWithID(self, x, y, z, ID):
         ''' Add a new node with ID
         
@@ -4259,16 +4254,17 @@ class NextFEMrest:
             Array of strings
         '''
         return des(self.nfrest('GET', '/loadcases/static', None, None))
-    def getStoreyStiffnessTable(self, lc):
+    def getStoreyStiffnessTable(self, lcX, lcY):
         ''' Get the storey stiffness table for a given loadcase
         
         Args:
-            lc: Name of the loadcase that contains a set of lateral forces, for each storey
+            lcX: Name of the loadcase that contains a set of lateral forces, for each storey, in X direction
+            lcY: Name of the loadcase that contains a set of lateral forces, for each storey, in Y direction
 
         Returns:
             Storey stiffness table as a list of list of string
         '''
-        return des(self.nfrest('GET', '/model/storeystiff/'+qt(lc)+'', None, None))
+        return des(self.nfrest('GET', '/model/storeystiff/'+qt(lcX)+'/'+qt(lcY)+'', None, None))
     def getSubsoilElements(self):
         ''' Get a list of elements having subsoil springs
         
@@ -4973,7 +4969,7 @@ class NextFEMrest:
         Returns:
             True if the model has been loaded correctly, False otherwise
         '''
-        return sbool(self.nfrest('', ''+json.dumps(bytes)+'/'+qt(modelFileName)+'', None, None))
+        return sbool(self.nfrest('POST', '/op/openbytes', base64.b64encode(bytearray(bytes)).decode('ascii'), {'path': modelFileName}))
     def quad2tria(self, elem):
         ''' Transform a quad element into 2 tria elements
         
@@ -5045,7 +5041,7 @@ class NextFEMrest:
         Returns:
             
         '''
-        return self.nfrest('GET', '/op/view/'+str(vstate)+'/'+str(resize)+'', None, None)
+        return self.nfrest('GET', '/op/view/'+str(vstate)+'/'+str(resize)+'', None, None, expect_body=True)
     def refreshHinges(self):
         ''' Recalculate all hinges assigned in the model. Useful after modification of material or section.
         
@@ -5467,6 +5463,18 @@ class NextFEMrest:
             True if successful
         '''
         return sbool(self.nfrest('GET', '/op/mesh/rotatenodes/'+str(axisX)+'/'+str(axisY)+'/'+str(axisZ)+'/'+str(angle)+'', None, dict([("nodes",json.dumps(nodes))])))
+    def RSloadsToLoadcase(self, lcSource, lcTarget, mode=0):
+        ''' Add loads from an already run Response Spectrum loadcase to a static loadcase. Use removeAllLoadsForLoadcase before to use this command on a non-empty target loadcase.
+        
+        Args:
+            lcSource: Source ResponseSpectrum loadcase. If the case is not existing or not set as ResponseSpectrum or not already run, it returns false
+            lcTarget: Target static loadcase. If the case is not existing or not set as static, it returns false
+            mode (optional): Number of the mode to be considered, or 0 for all modes
+
+        Returns:
+            True if successful
+        '''
+        return sbool(self.nfrest('GET', '/loadcase/rstolc/'+qt(lcSource)+'/'+qt(lcTarget)+'/'+str(mode)+'', None, None))
     def RunLoadCase(self, loadcase, outOfProc=False, noWindow=False):
         ''' Run a single loadcase
         
@@ -6783,7 +6791,7 @@ class NextFEMrest:
     @modeldata.setter
     def modeldata(self,value):
         '''   Model in JSON format   '''
-        self.nfrest('POST','/model/data',value)
+        self.nfrest('POST', '/model/data', json.loads(value) if isinstance(value, str) else value)
     @property
     def modeldatad(self):
         '''   Model in JSON format with dictionaries   '''
@@ -6791,7 +6799,7 @@ class NextFEMrest:
     @modeldatad.setter
     def modeldatad(self,value):
         '''   Model in JSON format with dictionaries   '''
-        self.nfrest('POST','/model/datad', heads={'val':str(value)})
+        self.nfrest('POST', '/model/datad', json.loads(value) if isinstance(value, str) else value)
     @property
     def modelName(self):
         '''   Name of the model. To be set prior to launch to have properly-named temporary files.   '''
@@ -6811,7 +6819,7 @@ class NextFEMrest:
     @modelresults.setter
     def modelresults(self,value):
         '''   Results in JSON format   '''
-        self.nfrest('POST','/model/results',value)
+        self.nfrest('POST', '/model/results', json.loads(value) if isinstance(value, str) else value)
     @property
     def modelresultsd(self):
         '''   Results in JSON format with dictionaries   '''
@@ -6819,7 +6827,7 @@ class NextFEMrest:
     @modelresultsd.setter
     def modelresultsd(self,value):
         '''   Results in JSON format with dictionaries   '''
-        self.nfrest('POST','/model/resultsd', heads={'val':str(value)})
+        self.nfrest('POST', '/model/resultsd', json.loads(value) if isinstance(value, str) else value)
     @property
     def nodeColor(self):
         '''   Change color for nodes   '''
